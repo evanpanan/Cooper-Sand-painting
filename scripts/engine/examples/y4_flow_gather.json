@@ -1,0 +1,73 @@
+{
+  "grammar": "y4_flow_gather",
+  "version": "1.0",
+  "theme": "classic_warm",
+  "palette_name": "暖沙标准-5色",
+  "lightTable": "#F5D080",
+  "sandColors": [
+    "#8B5A2B",
+    "#C4915E",
+    "#E8C07A",
+    "#F5DEA5",
+    "#A67040"
+  ],
+  "grainColor": "#6B4520",
+  "thinSandAlpha": 0.55,
+  "thickSandAlpha": 0.92,
+  "grainSize": 2.5,
+  "duration": 6.0,
+  "resolution": [1920, 1080],
+  "fps": 30,
+  "target_shape": "circle_at_960_540_r_240",
+  "target_shape_scale_anim": {
+    "startAt": 0.68,
+    "pulse_amp": 0.08,
+    "pulse_freq": 2.5
+  },
+  "layers": [
+    {
+      "sandColorIdx": 0,
+      "flowFrom": "left",
+      "delayPct": 0.0,
+      "particleCount": 3200,
+      "flowSpeed": 1.0,
+      "curlAmount": 0.3
+    },
+    {
+      "sandColorIdx": 2,
+      "flowFrom": "top",
+      "delayPct": 0.1,
+      "particleCount": 2800,
+      "flowSpeed": 0.9,
+      "curlAmount": 0.25
+    },
+    {
+      "sandColorIdx": 4,
+      "flowFrom": "right",
+      "delayPct": 0.1,
+      "particleCount": 3000,
+      "flowSpeed": 0.95,
+      "curlAmount": 0.28
+    }
+  ],
+  "gatherEndAt": 0.7,
+  "settle_duration_sec": 0.3,
+  "text": {
+    "main": "3亿用户",
+    "sub": "2026年Q2达成",
+    "pos": [960, 540],
+    "size": 200,
+    "weight": 800,
+    "align": "center",
+    "sub_size": 40,
+    "sub_weight": 500,
+    "sub_offset_y": 140,
+    "appearedAt": 4.2,
+    "animation": "scratch",
+    "animationDuration": 0.7
+  },
+  "motifs": [
+    {"id": "m2", "path": "arc_spiral", "speed": 0.8, "t": 0},
+    {"id": "m5", "amp": 0.07, "freq": 0.35}
+  ]
+}

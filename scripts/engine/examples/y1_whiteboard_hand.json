@@ -1,0 +1,74 @@
+{
+  "grammar": "y1_whiteboard_hand",
+  "version": "1.0",
+  "theme": "classic_warm",
+  "palette_name": "暖沙标准-5色",
+  "lightTable": "#F5D080",
+  "sandColors": [
+    "#8B5A2B",
+    "#C4915E",
+    "#E8C07A",
+    "#F5DEA5",
+    "#A67040"
+  ],
+  "grainColor": "#6B4520",
+  "thinSandAlpha": 0.55,
+  "thickSandAlpha": 0.92,
+  "grainSize": 2.5,
+  "duration": 6.5,
+  "resolution": [1920, 1080],
+  "fps": 30,
+  "path_style": "horizontal",
+  "hand_style": "dark_silhouette",
+  "line_width_px": 6,
+  "segments": [
+    {
+      "t_start": 0.3,
+      "t_end": 1.8,
+      "from": [200, 540],
+      "to": [580, 540],
+      "icon": "calendar",
+      "icon_pos": [580, 480],
+      "text": ["2018", "创业起步"],
+      "text_pos": [540, 610],
+      "text_size": 36
+    },
+    {
+      "t_start": 1.8,
+      "t_end": 3.3,
+      "from": [580, 540],
+      "to": [960, 540],
+      "icon": "rocket",
+      "icon_pos": [960, 480],
+      "text": ["2020", "产品上线"],
+      "text_pos": [920, 610],
+      "text_size": 36
+    },
+    {
+      "t_start": 3.3,
+      "t_end": 4.8,
+      "from": [960, 540],
+      "to": [1340, 540],
+      "icon": "chart",
+      "icon_pos": [1340, 480],
+      "text": ["2024", "增长爆发"],
+      "text_pos": [1300, 610],
+      "text_size": 36
+    },
+    {
+      "t_start": 4.8,
+      "t_end": 6.3,
+      "from": [1340, 540],
+      "to": [1720, 540],
+      "icon": "globe",
+      "icon_pos": [1720, 480],
+      "text": ["2026", "全球化"],
+      "text_pos": [1680, 610],
+      "text_size": 36
+    }
+  ],
+  "motifs": [
+    {"id": "m4", "area": [100, 400, 1820, 700], "freq": 12},
+    {"id": "m5", "amp": 0.06, "freq": 0.33}
+  ]
+}

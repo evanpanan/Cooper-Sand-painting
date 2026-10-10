@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sand Painting Engine · 沙画引擎</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    width: 100%;
+    min-height: 100vh;
+    background: #000;
+    color: #c8b088;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Mono", Monaco, Consolas, "Courier New", monospace;
+  }
+  body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 16px 28px;
+    background: radial-gradient(ellipse at center, #1a1408 0%, #050402 85%);
+  }
+  .page-header {
+    width: 100%;
+    max-width: 960px;
+    margin-bottom: 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+  }
+  .page-title {
+    font-size: 15px;
+    letter-spacing: 2.5px;
+    color: rgba(220, 195, 150, 0.85);
+    font-weight: 500;
+  }
+  .page-subtitle {
+    font-size: 11px;
+    letter-spacing: 1px;
+    color: rgba(180, 155, 115, 0.55);
+  }
+  .stage-wrap {
+    width: 100%;
+    max-width: 960px;
+    position: relative;
+  }
+  #stage {
+    display: block;
+    margin: 0 auto;
+    border-radius: 3px;
+    box-shadow: 0 8px 50px rgba(0,0,0,0.8), 0 0 0 1px rgba(180, 140, 80, 0.12);
+    background: #000;
+  }
+  .controls {
+    width: 100%;
+    max-width: 960px;
+    margin-top: 20px;
+    padding: 14px 18px 16px;
+    background: rgba(20, 14, 6, 0.85);
+    border: 1px solid rgba(180, 140, 80, 0.15);
+    border-radius: 6px;
+    backdrop-filter: blur(6px);
+  }
+  .timeline-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 12px;
+  }
+  .time-readout {
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.5px;
+    color: rgba(235, 210, 170, 0.9);
+    min-width: 130px;
+    text-align: center;
+    padding: 4px 10px;
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 4px;
+    border: 1px solid rgba(180, 140, 80, 0.1);
+  }
+  .scrub-slider {
+    flex: 1;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 6px;
+    background: rgba(60, 45, 25, 0.7);
+    border-radius: 3px;
+    outline: none;
+    cursor: pointer;
+  }
+  .scrub-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: linear-gradient(145deg, #d9b887, #a68150);
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.5), 0 0 0 2px rgba(220, 185, 135, 0.2);
+    transition: transform 0.1s ease;
+  }
+  .scrub-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.15);
+  }
+  .scrub-slider::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: linear-gradient(145deg, #d9b887, #a68150);
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+  }
+  .buttons-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+  .btn {
+    padding: 7px 18px;
+    font-size: 12px;
+    font-family: inherit;
+    letter-spacing: 1px;
+    border: 1px solid rgba(180, 140, 80, 0.3);
+    border-radius: 4px;
+    background: rgba(50, 35, 18, 0.6);
+    color: rgba(235, 210, 170, 0.9);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    user-select: none;
+  }
+  .btn:hover {
+    background: rgba(80, 58, 30, 0.8);
+    border-color: rgba(220, 175, 110, 0.5);
+    color: rgba(250, 230, 190, 1);
+  }
+  .btn:active {
+    transform: translateY(1px);
+  }
+  .btn.primary {
+    background: linear-gradient(180deg, rgba(120, 85, 42, 0.85), rgba(85, 58, 28, 0.85));
+    border-color: rgba(220, 175, 110, 0.45);
+  }
+  .btn.primary:hover {
+    background: linear-gradient(180deg, rgba(150, 108, 55, 0.95), rgba(110, 76, 36, 0.95));
+  }
+  .era-indicator {
+    margin-top: 10px;
+    text-align: center;
+    font-size: 11px;
+    color: rgba(170, 145, 105, 0.6);
+    letter-spacing: 0.5px;
+  }
+  .headless-banner {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    padding: 5px 12px;
+    background: rgba(150, 40, 40, 0.8);
+    color: #fff;
+    font-size: 11px;
+    border-radius: 4px;
+    letter-spacing: 1px;
+    display: none;
+    z-index: 9999;
+  }
+</style>
+</head>
+<body>
+
+<div class="headless-banner" id="headlessBanner">HEADLESS MODE</div>
+
+<div class="page-header">
+  <div class="page-title">SAND PAINTING ENGINE</div>
+  <div class="page-subtitle">沙画渲染引擎 · 100 BPM</div>
+</div>
+
+<div class="stage-wrap">
+  <canvas id="stage" width="1920" height="1080" style="width:100%;max-width:960px;aspect-ratio:16/9;margin:auto;display:block;background:#000"></canvas>
+</div>
+
+<div class="controls">
+  <div class="timeline-row">
+    <div class="time-readout" id="timeReadout">0:00.00 / 0:00.00</div>
+    <input type="range" class="scrub-slider" id="scrubSlider" min="0" max="1000" step="1" value="0">
+  </div>
+  <div class="buttons-row">
+    <button class="btn primary" id="btnPlay">▶ 播放</button>
+    <button class="btn" id="btnPause">⏸ 暂停</button>
+    <button class="btn" id="btnStop">⏹ 停止</button>
+  </div>
+  <div class="era-indicator" id="eraIndicator">—</div>
+</div>
+
+<script src="lib/util.js"></script>
+<script src="lib/sand_paint.js"></script>
+<script src="transitions.js"></script>
+<script src="eras.js"></script>
+<script src="scenes/s01_classic.js"></script>
+<script src="scenes/index.js"></script>
+<script src="engine.js"></script>
+
+<script>
+(function() {
+  var canvas = document.getElementById('stage');
+  window.__sandCanvas = canvas;
+
+  var isHeadless = (document.location.hash && document.location.hash.indexOf('headless') !== -1)
+    || window.__sandHeadless === true;
+
+  if (isHeadless) {
+    var banner = document.getElementById('headlessBanner');
+    if (banner) banner.style.display = 'block';
+    return;
+  }
+
+  var playBtn = document.getElementById('btnPlay');
+  var pauseBtn = document.getElementById('btnPause');
+  var stopBtn = document.getElementById('btnStop');
+  var slider = document.getElementById('scrubSlider');
+  var readout = document.getElementById('timeReadout');
+  var eraIndicator = document.getElementById('eraIndicator');
+
+  var isPlaying = false;
+  var rafId = null;
+  var currentT = 0;
+  var lastTimestamp = null;
+  var totalDur = 0;
+
+  function ensureEngine() {
+    if (window.__sandEngine && typeof window.__sandEngine.totalDuration === 'number') {
+      totalDur = window.__sandEngine.totalDuration;
+    }
+    if (totalDur <= 0) {
+      try {
+        var tl = window.__sandEngine && typeof window.__sandEngine.getTimeline === 'function'
+          ? window.__sandEngine.getTimeline()
+          : [];
+        if (tl && tl.length > 0) {
+          totalDur = tl[tl.length - 1].endT;
+        }
+      } catch (e) { totalDur = 0; }
+    }
+    if (totalDur <= 0) totalDur = 10;
+  }
+
+  function fmtTime(t) {
+    if (t < 0) t = 0;
+    var m = Math.floor(t / 60);
+    var s = Math.floor(t % 60);
+    var ms = Math.floor((t - Math.floor(t)) * 100);
+    return m + ':' + (s < 10 ? '0' : '') + s + '.' + (ms < 10 ? '0' : '') + ms;
+  }
+
+  function updateReadout() {
+    ensureEngine();
+    readout.textContent = fmtTime(currentT) + ' / ' + fmtTime(totalDur);
+    var pct = totalDur > 0 ? Math.min(1000, Math.max(0, Math.round(currentT / totalDur * 1000))) : 0;
+    if (!sliderBeingDragged) {
+      slider.value = String(pct);
+    }
+    if (window.__sandEngine && typeof window.__sandEngine.findEraAt === 'function') {
+      try {
+        var era = window.__sandEngine.findEraAt(currentT);
+        if (era) {
+          var sceneName = (era.sceneKey || '').replace(/^s\d+_/, '');
+          var tl = window.__sandEngine.getTimeline();
+          eraIndicator.textContent =
+            'Era ' + (era.idx + 1) + '/' + tl.length +
+            (era.counterLabel ? ' · ' + era.counterLabel : '') +
+            (sceneName ? ' · 场景:' + sceneName : '');
+        }
+      } catch (e) {}
+    }
+  }
+
+  function renderCurrent() {
+    if (typeof window.renderFrame === 'function') {
+      window.renderFrame(currentT);
+    }
+    updateReadout();
+  }
+
+  function tick(ts) {
+    if (!isPlaying) return;
+    if (lastTimestamp == null) lastTimestamp = ts;
+    var dt = (ts - lastTimestamp) / 1000;
+    lastTimestamp = ts;
+    ensureEngine();
+    currentT += dt;
+    if (totalDur > 0 && currentT >= totalDur) {
+      currentT = 0;
+    }
+    renderCurrent();
+    rafId = requestAnimationFrame(tick);
+  }
+
+  function doPlay() {
+    if (isPlaying) return;
+    isPlaying = true;
+    lastTimestamp = null;
+    rafId = requestAnimationFrame(tick);
+  }
+
+  function doPause() {
+    isPlaying = false;
+    if (rafId != null) {
+      cancelAnimationFrame(rafId);
+      rafId = null;
+    }
+  }
+
+  function doStop() {
+    doPause();
+    currentT = 0;
+    renderCurrent();
+  }
+
+  var sliderBeingDragged = false;
+
+  playBtn.addEventListener('click', doPlay);
+  pauseBtn.addEventListener('click', doPause);
+  stopBtn.addEventListener('click', doStop);
+
+  slider.addEventListener('mousedown', function() { sliderBeingDragged = true; });
+  slider.addEventListener('touchstart', function() { sliderBeingDragged = true; }, { passive: true });
+
+  slider.addEventListener('input', function() {
+    ensureEngine();
+    var val = parseInt(slider.value, 10) / 1000;
+    currentT = val * totalDur;
+    renderCurrent();
+  });
+
+  slider.addEventListener('change', function() {
+    sliderBeingDragged = false;
+    ensureEngine();
+    var val = parseInt(slider.value, 10) / 1000;
+    currentT = val * totalDur;
+    renderCurrent();
+  });
+
+  document.addEventListener('mouseup', function() { sliderBeingDragged = false; });
+  document.addEventListener('touchend', function() { sliderBeingDragged = false; });
+
+  document.addEventListener('keydown', function(e) {
+    if (e.code === 'Space') {
+      e.preventDefault();
+      if (isPlaying) doPause(); else doPlay();
+    } else if (e.code === 'ArrowRight') {
+      ensureEngine();
+      currentT = Math.min(totalDur, currentT + (e.shiftKey ? 5 : 0.1));
+      renderCurrent();
+    } else if (e.code === 'ArrowLeft') {
+      currentT = Math.max(0, currentT - (e.shiftKey ? 5 : 0.1));
+      renderCurrent();
+    } else if (e.code === 'Home') {
+      currentT = 0;
+      renderCurrent();
+    } else if (e.code === 'End') {
+      ensureEngine();
+      currentT = totalDur;
+      renderCurrent();
+    }
+  });
+
+  function boot() {
+    ensureEngine();
+    if (typeof window.renderFrame === 'function') {
+      window.renderFrame(0);
+    }
+    updateReadout();
+  }
+
+  if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    setTimeout(boot, 80);
+  } else {
+    document.addEventListener('DOMContentLoaded', function() { setTimeout(boot, 80); });
+  }
+})();
+</script>
+</body>
+</html>

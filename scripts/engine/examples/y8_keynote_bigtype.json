@@ -1,0 +1,72 @@
+{
+  "grammar": "y8_keynote_bigtype",
+  "version": "1.0",
+  "theme": "classic_warm",
+  "palette_name": "暖沙米金-5色",
+  "lightTable": "#F9E5B0",
+  "sandColors": [
+    "#9C7A48",
+    "#C4A068",
+    "#E0C088",
+    "#F0D8A8",
+    "#B89058"
+  ],
+  "grainColor": "#785838",
+  "thinSandAlpha": 0.52,
+  "thickSandAlpha": 0.93,
+  "grainSize": 2.8,
+  "duration": 4.5,
+  "resolution": [1920, 1080],
+  "fps": 30,
+  "main_word": "长期主义",
+  "main_size": 260,
+  "main_weight": 900,
+  "main_pos": [960, 480],
+  "main_color_sandIdx": 0,
+  "slam_t": 0.5,
+  "slam_scale": 1.6,
+  "slam_bounce_count": 3,
+  "slam_bounce_decay": 0.4,
+  "dwell_breath": true,
+  "breath_amp": 0.03,
+  "breath_freq": 0.4,
+  "sub_word": "做时间的朋友",
+  "sub_size": 64,
+  "sub_weight": 500,
+  "sub_pos": [960, 720],
+  "sub_color_sandIdx": 2,
+  "sub_appearedAt": 2.2,
+  "sub_animation": "fade_in_up",
+  "sub_animationDuration": 0.7,
+  "accent_decoration": {
+    "type": "horizontal_rules",
+    "sandColorIdx": 1,
+    "rule_width": 480,
+    "rule_thickness": 4,
+    "gap_from_main": 80,
+    "appearedAt": 1.6
+  },
+  "corner_doodle": {
+    "enabled": true,
+    "type": "hourglass_branches",
+    "posTL": [180, 180],
+    "posBR": [1740, 900],
+    "scale": 0.7,
+    "sandColorIdx": 3,
+    "alpha": 0.5,
+    "appearedAt": 2.8
+  },
+  "impact_shockwave": {
+    "enabled": true,
+    "t": 0.5,
+    "rings": 3,
+    "max_radius": 900,
+    "thickness": 6,
+    "sandColorIdx": 2,
+    "alpha_decay": 0.7
+  },
+  "motifs": [
+    {"id": "m5", "amp": 0.08, "freq": 0.45},
+    {"id": "m4", "area": [200, 200, 1720, 900], "freq": 12}
+  ]
+}

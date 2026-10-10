@@ -1,0 +1,86 @@
+{
+  "grammar": "y3_palm_wipe_list",
+  "version": "1.0",
+  "theme": "classic_warm",
+  "palette_name": "暖沙标准-5色",
+  "lightTable": "#F5D080",
+  "sandColors": [
+    "#8B5A2B",
+    "#C4915E",
+    "#E8C07A",
+    "#F5DEA5",
+    "#A67040"
+  ],
+  "grainColor": "#6B4520",
+  "thinSandAlpha": 0.55,
+  "thickSandAlpha": 0.92,
+  "grainSize": 2.5,
+  "duration": 8.0,
+  "resolution": [1920, 1080],
+  "fps": 30,
+  "wipe_direction": "left_to_right",
+  "layout": "center_stack",
+  "item_layout": {
+    "start_y": 280,
+    "spacing_y": 180,
+    "icon_x": 640,
+    "text_x": 800,
+    "item_width": 640
+  },
+  "item_dwell_sec": 2.0,
+  "wipe_transition_sec": 0.4,
+  "items": [
+    {
+      "idx": 0,
+      "icon": "rocket",
+      "icon_scale": 1.0,
+      "icon_sandColorIdx": 2,
+      "text": "专注沙画",
+      "text_size": 64,
+      "text_weight": 600,
+      "t_start": 0.2,
+      "t_end": 2.0,
+      "doodle": "sparkle_trail"
+    },
+    {
+      "idx": 1,
+      "icon": "trophy",
+      "icon_scale": 1.0,
+      "icon_sandColorIdx": 1,
+      "text": "品质至上",
+      "text_size": 64,
+      "text_weight": 600,
+      "t_start": 2.2,
+      "t_end": 4.0,
+      "doodle": "laurel_wreath"
+    },
+    {
+      "idx": 2,
+      "icon": "heart",
+      "icon_scale": 1.0,
+      "icon_sandColorIdx": 0,
+      "text": "用户第一",
+      "text_size": 64,
+      "text_weight": 600,
+      "t_start": 4.2,
+      "t_end": 6.0,
+      "doodle": "pulse_line"
+    },
+    {
+      "idx": 3,
+      "icon": "star",
+      "icon_scale": 1.0,
+      "icon_sandColorIdx": 3,
+      "text": "长期主义",
+      "text_size": 64,
+      "text_weight": 600,
+      "t_start": 6.2,
+      "t_end": 7.8,
+      "doodle": "orbit_rings"
+    }
+  ],
+  "motifs": [
+    {"id": "m6", "shape": "palm_ellipse", "t": 0},
+    {"id": "m4", "area": [400, 200, 1520, 900], "freq": 10}
+  ]
+}
