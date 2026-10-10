@@ -1,10 +1,14 @@
 #!/usr/bin/env python3
 """
-film_gate.py - 沙画视频质量门禁分析
-三个核心分析函数:
-  1. measure_motion_ratio  - 快速运动帧比例 + 最差30秒窗口
-  2. detect_empty_segments - 空画面检测(无沙粒/近乎纯色)
-  3. measure_blue_purple_ratio - 蓝紫底色帧占比
+film_gate.py - 沙画视频质量门禁分析（6 道门禁）
+
+六大门禁:
+  1. motion_fast          - 快速运动帧比例 (< 3.5% 绿 / < 6% 黄 / 否则 红)
+  2. empty_segment        - 中段无 >0.3s 空画面 (无空画面 绿 / 否则 红)
+  3. blue_purple          - 蓝紫底色帧占比 (<=30% 绿 / 否则 红或豁免黄)
+  4. hard_cut             - 硬切数 (=0 绿 / >0 红，零硬切铁律 P12)
+  5. tone_cool_warm       - 冷调占比 / 暖调占比 (按 theme，C%>70 绿或 W%>70 绿，否则 黄或豁免)
+  6. progressive_ratio    - 渐进时间比 scene/morph ∈ [0.25,0.35] (绿/否则 红 P13)
 """
 import subprocess
 import tempfile
@@ -13,6 +17,7 @@ import json
 import math
 import sys
 import os
+import re
 from pathlib import Path
 from collections import deque
 
@@ -24,11 +29,13 @@ except ImportError:
 
 
 def _ensure_numpy():
+    """Ensure numpy is available, raise ImportError otherwise."""
     if not HAS_NUMPY:
         raise ImportError("numpy is required. Run: pip install numpy")
 
 
 def _run_cmd(cmd, check=True, capture_output=True):
+    """Run a subprocess command with error checking."""
     result = subprocess.run(cmd, capture_output=capture_output, text=True)
     if check and result.returncode != 0:
         stderr_tail = (result.stderr or "")[-2000:]
@@ -37,6 +44,10 @@ def _run_cmd(cmd, check=True, capture_output=True):
 
 
 def _ffprobe_video_info(video_path):
+    """
+    Probe video metadata (width, height, duration, fps, frame count) via ffprobe.
+    Returns dict with keys: width, height, duration, fps, nb_frames.
+    """
     cmd = [
         "ffprobe", "-v", "error",
         "-print_format", "json",
@@ -78,13 +89,13 @@ def _ffprobe_video_info(video_path):
 
 def _extract_raw_frames(video_path, out_dir, scale_w=160, scale_h=90, fps=None, vframes=None):
     """
-    使用 ffmpeg 提取低分辨率 RGB24 原始帧到目录下，
-    返回帧列表 (每个帧是 np.uint8 shape=(H,W,3) 的文件路径)，以及每帧时间
+    Use ffmpeg to extract low-resolution RGB24 raw frames.
+    Returns (frames_data, timestamps, scale_w, scale_h, eff_fps).
+    frames_data is a list of np.uint8 (H, W, 3) arrays.
     """
     _ensure_numpy()
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
-    pattern = str(out_dir / "frame_%06d.rgb")
 
     vf_parts = []
     if fps is not None:
@@ -100,7 +111,6 @@ def _extract_raw_frames(video_path, out_dir, scale_w=160, scale_h=90, fps=None, 
     ]
     if vframes is not None:
         cmd += ["-vframes", str(vframes)]
-    pattern_glob = str(out_dir / "frame_%06d.rgb")
     tmp_out = str(out_dir / "frames.raw")
     cmd += [tmp_out]
     _run_cmd(cmd)
@@ -136,6 +146,7 @@ def _extract_raw_frames(video_path, out_dir, scale_w=160, scale_h=90, fps=None, 
 
 
 def _rgb_to_luma(rgb_frame):
+    """Convert RGB uint8 frame to luma (float32) using Rec. 601 coefficients."""
     _ensure_numpy()
     r = rgb_frame[:, :, 0].astype(np.float32)
     g = rgb_frame[:, :, 1].astype(np.float32)
@@ -144,6 +155,7 @@ def _rgb_to_luma(rgb_frame):
 
 
 def _rgb_to_hsv(rgb_frame):
+    """Convert an RGB uint8 frame to HSV (H in [0,1], S in [0,1], V in [0,1])."""
     _ensure_numpy()
     rgb = rgb_frame.astype(np.float32) / 255.0
     r, g, b = rgb[:, :, 0], rgb[:, :, 1], rgb[:, :, 2]
@@ -165,6 +177,7 @@ def _rgb_to_hsv(rgb_frame):
 
 
 def _sobel_edge_count(luma_frame, threshold=30):
+    """Approximate Sobel edge count for a luma frame (pixels with magnitude > threshold)."""
     _ensure_numpy()
     h, w = luma_frame.shape
     gx = np.zeros_like(luma_frame)
@@ -177,22 +190,12 @@ def _sobel_edge_count(luma_frame, threshold=30):
 
 def measure_motion_ratio(video_path):
     """
-    分析视频的运动特征。
+    分析视频的运动特征（门禁1）。
+
     使用 ffmpeg 以低分辨率提取帧，计算相邻帧变化百分比。
-    "快速"定义:
-      - 帧间变化像素 > 18% 或
-      - 帧间变化梯度 > 8% (即 连续两帧的变化率之差 > 8%)
-    返回 dict:
-      {
-        fast_motion_ratio: float,  (0~1)
-        worst_30s_start: float 秒,
-        worst_30s_end:   float 秒,
-        per_frame_changed_pct: [float],  (每个帧的%变化, 长度=N-1)
-        per_frame_timestamps: [float],
-        fast_flags: [bool],
-        avg_motion_pct: float,
-        max_motion_pct: float,
-      }
+    "快速"定义: 帧间变化像素 > 18% 或 帧间变化梯度 > 8%。
+
+    Returns dict with fast_motion_ratio, worst_30s_{start,end}, per_frame stats.
     """
     _ensure_numpy()
     video_path = Path(video_path)
@@ -288,10 +291,12 @@ def measure_motion_ratio(video_path):
 
 def detect_empty_segments(video_path):
     """
-    检测空画面片段: 连续 > 0.3s 的画面, 满足:
-      - 亮度 std < 4.0   (近乎纯色)
-      - Sobel 边缘数 < 2000 (低分辨率下几乎没有沙粒边缘)
-    返回 [[start_sec, end_sec], ...]
+    检测空画面片段（门禁2）。
+
+    连续 > 0.3s 的画面满足：亮度 std < 4.0 且 Sobel 边缘数 < 2000。
+    仅返回中段 (duration 20% ~ 80%) 的空段。
+
+    Returns [[start_sec, end_sec], ...]
     """
     _ensure_numpy()
     video_path = Path(video_path)
@@ -353,25 +358,16 @@ def detect_empty_segments(video_path):
 
 def measure_blue_purple_ratio(video_path):
     """
-    测量蓝/紫底色帧比例。
-    以 4 fps 采样, 判断:
-      - 主导色 H 位于 [200°, 320°] (即 H 在 200/360 ~ 320/360 之间, 约蓝-紫-品红范围)
-      - 且 饱和度 > 25% (不是灰调)
-    返回 dict:
-      {
-        ratio: float,  (0~1)
-        total_sampled: int,
-        flagged_frames: int,
-        per_frame_hsv_mean: [(h_deg, sat_pct, val_pct)],
-        flagged_indices: [int],
-      }
+    测量蓝/紫底色帧比例（门禁3）。
+
+    以 4 fps 采样，判断主导色相位于 H ∈ [200°, 320°] 且饱和度 > 25%。
+    Returns dict with ratio, counts, per-frame HSV means.
     """
     _ensure_numpy()
     video_path = Path(video_path)
     if not video_path.exists():
         raise FileNotFoundError(f"Video not found: {video_path}")
 
-    info = _ffprobe_video_info(video_path)
     sample_fps = 4
 
     with tempfile.TemporaryDirectory(prefix="mg_bp_") as tmpd:
@@ -412,21 +408,237 @@ def measure_blue_purple_ratio(video_path):
         }
 
 
-def run_all_checks(video_path, allow_blue_purple=False, allow_blue_purple_reason=None):
+def detect_hard_cuts(video_path):
     """
-    综合执行所有门禁检查。返回:
-      {
-        status: "green" | "yellow" | "red",
-        gates: {
-          motion_fast:   { pass: bool, level: "green"/"yellow"/"red", value, threshold, detail },
-          empty_segment: { pass: bool, level: "green"/"yellow"/"red", value, threshold, detail },
-          blue_purple:   { pass: bool, level: "green"/"yellow"/"red", value, threshold, detail },
-        },
-        motion_result: {...},
-        empty_result: [...],
-        bp_result: {...},
-        remediation: [str],
-      }
+    检测硬切次数与时间码（门禁4 · P12 零硬切铁律）。
+
+    算法: 遍历帧计算相邻帧 MAD，如果瞬时 MAD>25 且前后 3 帧该位置是峰值，记为 1 次硬切。
+    Returns dict: { count, timestamps_sec, per_frame_mad, peak_flags }
+    """
+    _ensure_numpy()
+    video_path = Path(video_path)
+    if not video_path.exists():
+        raise FileNotFoundError(f"Video not found: {video_path}")
+
+    info = _ffprobe_video_info(video_path)
+    analysis_fps = 10
+
+    with tempfile.TemporaryDirectory(prefix="mg_hc_") as tmpd:
+        frames, timestamps, sw, sh, eff_fps = _extract_raw_frames(
+            video_path, tmpd, scale_w=160, scale_h=90, fps=analysis_fps
+        )
+        n = len(frames)
+        if n < 7:
+            return {
+                "count": 0,
+                "timestamps_sec": [],
+                "per_frame_mad": [],
+                "peak_flags": [],
+            }
+
+        prev = frames[0].astype(np.float32)
+        mads = []
+        for i in range(1, n):
+            curr = frames[i].astype(np.float32)
+            diff = np.abs(curr - prev)
+            mad = float(np.mean(diff))
+            mads.append(mad)
+            prev = curr
+
+        peak_flags = [False] * len(mads)
+        for i in range(len(mads)):
+            if mads[i] > 25.0:
+                lo = max(0, i - 3)
+                hi = min(len(mads), i + 4)
+                window = mads[lo:hi]
+                if window and mads[i] == max(window):
+                    peak_flags[i] = True
+
+        timestamps_sec = []
+        for idx, flag in enumerate(peak_flags):
+            if flag:
+                ts = (idx + 1) / eff_fps
+                timestamps_sec.append(round(ts, 2))
+
+        return {
+            "count": len(timestamps_sec),
+            "timestamps_sec": timestamps_sec,
+            "per_frame_mad": mads,
+            "peak_flags": peak_flags,
+            "analysis_fps": float(eff_fps),
+            "max_mad": float(max(mads) if mads else 0.0),
+            "avg_mad": float(sum(mads) / max(1, len(mads))),
+        }
+
+
+def measure_tone_cw_ratio(video_path, theme="realistic_cool"):
+    """
+    测量冷/中/暖像素占比（门禁5 · P11 沙画识别核心）。
+
+    冷像素: B > R + 18 且 G > R + 10
+    暖像素: R > B + 18 且 R > G + 8
+    否则为中像素。
+    theme=realistic_cool: C%>70 绿，否则黄
+    theme=classic_warm: 反过来 W%>70 绿
+
+    Returns dict: { C_pct, M_pct, W_pct, pass_level, detail }
+    """
+    _ensure_numpy()
+    video_path = Path(video_path)
+    if not video_path.exists():
+        raise FileNotFoundError(f"Video not found: {video_path}")
+
+    sample_fps = 3
+
+    with tempfile.TemporaryDirectory(prefix="mg_cw_") as tmpd:
+        frames, timestamps, sw, sh, eff_fps = _extract_raw_frames(
+            video_path, tmpd, scale_w=120, scale_h=68, fps=sample_fps
+        )
+        n = len(frames)
+        if n == 0:
+            return {
+                "C_pct": 0.0,
+                "M_pct": 0.0,
+                "W_pct": 0.0,
+                "theme": theme,
+                "total_pixels": 0,
+                "sampled_frames": 0,
+            }
+
+        cold_total = 0
+        warm_total = 0
+        mid_total = 0
+        total_pixels = 0
+
+        for f in frames:
+            arr = f.astype(np.int16)
+            R = arr[:, :, 0]
+            G = arr[:, :, 1]
+            B = arr[:, :, 2]
+            cold_mask = (B > R + 18) & (G > R + 10)
+            warm_mask = (R > B + 18) & (R > G + 8)
+            mid_mask = ~(cold_mask | warm_mask)
+            cold_total += int(np.sum(cold_mask))
+            warm_total += int(np.sum(warm_mask))
+            mid_total += int(np.sum(mid_mask))
+            total_pixels += cold_mask.size
+
+        if total_pixels == 0:
+            return {
+                "C_pct": 0.0,
+                "M_pct": 0.0,
+                "W_pct": 0.0,
+                "theme": theme,
+                "total_pixels": 0,
+                "sampled_frames": n,
+            }
+
+        c_pct = round(cold_total / total_pixels * 100, 2)
+        w_pct = round(warm_total / total_pixels * 100, 2)
+        m_pct = round(mid_total / total_pixels * 100, 2)
+
+        return {
+            "C_pct": c_pct,
+            "M_pct": m_pct,
+            "W_pct": w_pct,
+            "theme": theme,
+            "total_pixels": total_pixels,
+            "sampled_frames": n,
+        }
+
+
+def parse_schedule_js(schedule_path):
+    """
+    简易 JS eval：读 schedule.js，用 node 子进程取 USER_SCHEDULE 返回数组（门禁6 用）。
+    失败返回 None。
+    """
+    if not schedule_path:
+        return None
+    p = Path(schedule_path)
+    if not p.exists():
+        return None
+    try:
+        text = p.read_text(encoding="utf-8")
+    except Exception:
+        return None
+    try:
+        m = re.search(r'window\.(USER_SCHEDULE|PROGRESSIVE_DEMO)\s*=\s*function\s*\(\s*\)\s*\{([\s\S]*?)\};?\s*$', text)
+        if m:
+            body = m.group(2).strip()
+            node_code = f"process.stdout.write(JSON.stringify((function(){{{body}}})()));"
+            result = subprocess.run(
+                ["node", "-e", node_code],
+                capture_output=True, text=True, timeout=10
+            )
+            if result.returncode == 0 and result.stdout.strip():
+                return json.loads(result.stdout.strip())
+        arr_m = re.search(r'return\s*(\[[\s\S]*?\])\s*;', text)
+        if arr_m:
+            arr_text = arr_m.group(1)
+            arr_text = re.sub(r'//.*$', '', arr_text, flags=re.MULTILINE)
+            arr_text = re.sub(r"'", '"', arr_text)
+            return json.loads(arr_text)
+    except Exception:
+        return None
+    return None
+
+
+def measure_progressive_ratio(schedule_path):
+    """
+    测量渐进时间比（门禁6 · P13 作画:渐进=0.3:1 铁律）。
+
+    scene 总长 / morph 总长 → ratio。
+    理想 [0.25, 0.35]；warn [0.2, 0.45]；否则 fail。
+    无 schedule 返回 na=True。
+    """
+    sched = parse_schedule_js(schedule_path)
+    if sched is None:
+        return {
+            "na": True,
+            "ratio": None,
+            "scene_total": 0.0,
+            "morph_total": 0.0,
+            "seg_count": 0,
+        }
+    scene_total = 0.0
+    morph_total = 0.0
+    seg_count = 0
+    for seg in sched:
+        if not isinstance(seg, dict):
+            continue
+        if "scene" in seg:
+            scene_total += float(seg.get("duration", 0))
+            seg_count += 1
+        elif "morph" in seg:
+            morph_total += float(seg["morph"].get("duration", 0))
+            seg_count += 1
+    if seg_count <= 1 or morph_total <= 0:
+        return {
+            "na": True,
+            "ratio": None,
+            "scene_total": round(scene_total, 1),
+            "morph_total": round(morph_total, 1),
+            "seg_count": seg_count,
+            "reason": "只有单 scene 或无 morph 段",
+        }
+    ratio = round(scene_total / morph_total, 4)
+    return {
+        "na": False,
+        "ratio": ratio,
+        "scene_total": round(scene_total, 1),
+        "morph_total": round(morph_total, 1),
+        "seg_count": seg_count,
+    }
+
+
+def run_all_checks(video_path, allow_blue_purple=False, allow_blue_purple_reason=None,
+                   theme="realistic_cool", allow_warm_sand=False, allow_warm_sand_reason=None,
+                   schedule_path=None):
+    """
+    综合执行全部 6 道门禁检查。
+
+    Returns dict with status ("green"/"yellow"/"red"), gates (6 项), remediation list,
+      plus raw results for each check.
     """
     remediation = []
     gates = {}
@@ -512,6 +724,117 @@ def run_all_checks(video_path, allow_blue_purple=False, allow_blue_purple_reason
                 f" (若此为风格需求可使用 --allow-blue-purple 理由 豁免为黄灯)"
             )
 
+    hc_res = detect_hard_cuts(video_path)
+    hc_count = hc_res["count"]
+    if hc_count == 0:
+        gates["hard_cut"] = {
+            "pass": True, "level": "green",
+            "value": 0, "threshold": "=0 零硬切 (P12)",
+            "detail": f"硬切数 = 0 · 零硬切铁律通过 (P12) · MAD 峰值 max={hc_res.get('max_mad', 0):.1f}",
+        }
+    else:
+        ts_str = ", ".join(f"{t}s" for t in hc_res["timestamps_sec"])
+        gates["hard_cut"] = {
+            "pass": False, "level": "red",
+            "value": hc_count, "threshold": "=0 零硬切 (P12)",
+            "detail": f"硬切数 = {hc_count} 次（时间码：{ts_str}）· 🔴红灯 · 零硬切铁律 (P12)",
+        }
+        remediation.append(
+            f"[硬切P12] 检测到 {hc_count} 次硬切（时间码：{ts_str}）。"
+            f"沙画表演零硬切铁律（P12），修法：把硬切处改成 wipe_palm_half 14~18s 渐进转场"
+            f"（四模式首选半抹保留下半截重画上半截）。"
+        )
+
+    cw_res = measure_tone_cw_ratio(video_path, theme=theme)
+    c_pct = cw_res["C_pct"]
+    w_pct = cw_res["W_pct"]
+    bench = "成品样片参考 C=73.8%"
+    if theme == "classic_warm":
+        if w_pct > 70:
+            gates["tone_cool_warm"] = {
+                "pass": True, "level": "green",
+                "value": w_pct, "threshold": "W% > 70% 绿 (theme=classic_warm)",
+                "detail": f"theme=classic_warm · 暖 W%={w_pct:.1f}% 中 M%={cw_res['M_pct']:.1f}% 冷 C%={c_pct:.1f}% · {bench}",
+            }
+        else:
+            if allow_warm_sand:
+                reason_str = f" (豁免理由: {allow_warm_sand_reason or '未说明'})"
+                gates["tone_cool_warm"] = {
+                    "pass": True, "level": "yellow",
+                    "value": w_pct, "threshold": "W% > 70% (豁免时仅警告)",
+                    "detail": f"W%={w_pct:.1f} 低于暖沙 70% 线 · 🟡黄灯{reason_str}",
+                }
+            else:
+                gates["tone_cool_warm"] = {
+                    "pass": True, "level": "yellow",
+                    "value": c_pct, "threshold": "C% > 70% 默认 (realistic_cool)",
+                    "detail": (
+                        f"C%={c_pct:.1f}，低于真实沙画 73.8% 成品线。"
+                        f"修法：确保 palette_name=写实冷光台-5色 / realistic_cool_standard，不能混入暖黄金色。"
+                        f"如果用户明确指定暖沙 classic_warm，用 --allow-warm-sand \"理由\" 降到提示。"
+                    ),
+                }
+    else:
+        if c_pct > 70:
+            gates["tone_cool_warm"] = {
+                "pass": True, "level": "green",
+                "value": c_pct, "threshold": "C% > 70% 绿 (theme=realistic_cool 默认)",
+                "detail": f"冷 C%={c_pct:.1f}% 中 M%={cw_res['M_pct']:.1f}% 暖 W%={w_pct:.1f}% · {bench}",
+            }
+        else:
+            if allow_warm_sand:
+                reason_str = f" (豁免理由: {allow_warm_sand_reason or '未说明'})"
+                gates["tone_cool_warm"] = {
+                    "pass": True, "level": "yellow",
+                    "value": c_pct, "threshold": "C% > 70% (豁免时仅警告)",
+                    "detail": f"C%={c_pct:.1f} 低于真实沙画 73.8% 成品线 · 🟡黄灯{reason_str}",
+                }
+            else:
+                gates["tone_cool_warm"] = {
+                    "pass": True, "level": "yellow",
+                    "value": c_pct, "threshold": "C% > 70% 默认 (realistic_cool)",
+                    "detail": (
+                        f"C%={c_pct:.1f}，低于真实沙画 73.8% 成品线。"
+                        f"修法：确保 palette_name=写实冷光台-5色 / realistic_cool_standard，不能混入暖黄金色。"
+                        f"如果用户明确指定暖沙 classic_warm，用 --allow-warm-sand \"理由\" 降到提示。"
+                    ),
+                }
+
+    prog_res = measure_progressive_ratio(schedule_path)
+    if prog_res.get("na"):
+        gates["progressive_ratio"] = {
+            "pass": True, "level": "green",
+            "value": None, "threshold": "scene/morph ∈ [0.25, 0.35] (无 schedule 跳过)",
+            "detail": f"未提供或无法解析 schedule，门禁6 跳过 (scene_total={prog_res.get('scene_total',0)}, morph_total={prog_res.get('morph_total',0)})",
+            "na": True,
+        }
+    else:
+        ratio = prog_res["ratio"]
+        scene_t = prog_res["scene_total"]
+        morph_t = prog_res["morph_total"]
+        if 0.25 <= ratio <= 0.35:
+            gates["progressive_ratio"] = {
+                "pass": True, "level": "green",
+                "value": ratio, "threshold": "[0.25, 0.35] PASS (P13 0.3:1)",
+                "detail": f"scene {scene_t}s / morph {morph_t}s = ratio {ratio:.3f} · 落在 [0.25,0.35] 理想区间 (P13)",
+            }
+        else:
+            gates["progressive_ratio"] = {
+                "pass": False, "level": "red",
+                "value": ratio, "threshold": "[0.25, 0.35] PASS (P13)",
+                "detail": f"scene {scene_t}s / morph {morph_t}s = ratio {ratio:.3f} · 🔴红灯 不在 [0.25,0.35] (P13)",
+            }
+            if ratio < 0.25:
+                remediation.append(
+                    f"[渐进比P13] ratio={ratio:.3f} 渐进时间太少，观众看不到作画过程；"
+                    f"修法：把 morph 时长从 14s 拉到 18s 或 20s，scene 展示从 6s 降到 4s，把比例拉到 0.3。"
+                )
+            else:
+                remediation.append(
+                    f"[渐进比P13] ratio={ratio:.3f} 展示时间太长像 PPT；"
+                    f"修法：把纯 scene 展示砍到 4~5s，渐进时长不变，把比例拉回 [0.25, 0.35]。"
+                )
+
     any_red = any(g["level"] == "red" for g in gates.values())
     any_yellow = any(g["level"] == "yellow" for g in gates.values())
     if any_red:
@@ -527,20 +850,34 @@ def run_all_checks(video_path, allow_blue_purple=False, allow_blue_purple_reason
         "motion_result": motion_res,
         "empty_result": empty_res,
         "bp_result": bp_res,
+        "hard_cut_result": hc_res,
+        "tone_cw_result": cw_res,
+        "progressive_result": prog_res,
         "remediation": remediation,
     }
 
 
-def main_check(video_path, allow_blue_purple=False, allow_blue_purple_reason=None, verbose=True):
-    """
-    被 deliver.py 调用的主入口。run_all_checks 的包装。
-    """
-    result = run_all_checks(video_path, allow_blue_purple, allow_blue_purple_reason)
+def main_check(video_path, allow_blue_purple=False, allow_blue_purple_reason=None, verbose=True,
+               theme="realistic_cool", allow_warm_sand=False, allow_warm_sand_reason=None,
+               schedule_path=None):
+    """被 deliver.py 调用的主入口。run_all_checks 的包装。返回结果 dict。"""
+    result = run_all_checks(
+        video_path,
+        allow_blue_purple=allow_blue_purple,
+        allow_blue_purple_reason=allow_blue_purple_reason,
+        theme=theme,
+        allow_warm_sand=allow_warm_sand,
+        allow_warm_sand_reason=allow_warm_sand_reason,
+        schedule_path=schedule_path,
+    )
     if verbose:
-        print(f"\n[film_gate] 综合门禁结果: {'🔴红灯' if result['status']=='red' else '🟡黄灯' if result['status']=='yellow' else '🟢绿灯'}")
+        print(f"\n[film_gate] 综合门禁结果(6项): {'🔴红灯' if result['status']=='red' else '🟡黄灯' if result['status']=='yellow' else '🟢绿灯'}")
         for name, g in result["gates"].items():
             mark = "✅" if g["pass"] else "❌"
-            print(f"  {mark} {name:14s} [{g['level'].upper():6s}] {g['detail']}")
+            level_up = g["level"].upper()
+            if g.get("na"):
+                level_up = "SKIP"
+            print(f"  {mark} {name:18s} [{level_up:6s}] {g['detail'][:100]}")
         if result["remediation"]:
             print(f"\n[film_gate] 🔴 红灯修复建议:")
             for idx, line in enumerate(result["remediation"], 1):
@@ -550,15 +887,36 @@ def main_check(video_path, allow_blue_purple=False, allow_blue_purple_reason=Non
 
 if __name__ == "__main__":
     import argparse
-    p = argparse.ArgumentParser(description="Sand Painting Film Gate - 视频质量门禁")
+    p = argparse.ArgumentParser(
+        description="Sand Painting Film Gate - 视频质量门禁 (6道: 快速运动/中段空画面/蓝紫占比/硬切数P12/色调占比P11/渐进比P13)"
+    )
     p.add_argument("video", help="输入视频路径 (.mp4)")
-    p.add_argument("--allow-blue-purple", type=str, default=None, metavar="理由", help="豁免蓝紫底为黄灯, 需给理由")
+    p.add_argument("--allow-blue-purple", type=str, default=None, metavar="理由",
+                   help="豁免蓝紫底为黄灯, 需给理由")
+    p.add_argument("--allow-warm-sand", type=str, default=None, metavar="理由",
+                   help="豁免冷调占比<70%%为黄灯 (用户明确指定暖沙classic_warm时用), 需给理由")
+    p.add_argument("--theme", choices=["realistic_cool", "classic_warm", "colorful", "glow_night"],
+                   default="realistic_cool", help="主题调色板 (默认 realistic_cool，用于P11色调阈值)")
+    p.add_argument("--schedule", type=str, default=None,
+                   help="schedule.js 路径 (用于P13渐进时间比，能解析 USER_SCHEDULE 返回数组)")
     p.add_argument("--dump", action="store_true", help="输出详细 JSON 结果")
     args = p.parse_args()
 
     allow_bp = args.allow_blue_purple is not None
-    reason = args.allow_blue_purple
-    res = main_check(args.video, allow_blue_purple=allow_bp, allow_blue_purple_reason=reason, verbose=True)
+    reason_bp = args.allow_blue_purple
+    allow_ws = args.allow_warm_sand is not None
+    reason_ws = args.allow_warm_sand
+
+    res = main_check(
+        args.video,
+        allow_blue_purple=allow_bp,
+        allow_blue_purple_reason=reason_bp,
+        verbose=True,
+        theme=args.theme,
+        allow_warm_sand=allow_ws,
+        allow_warm_sand_reason=reason_ws,
+        schedule_path=args.schedule,
+    )
     if args.dump:
         out = {
             k: v for k, v in res.items()
@@ -576,6 +934,24 @@ if __name__ == "__main__":
             "ratio": res["bp_result"]["ratio"],
             "flagged": res["bp_result"]["flagged_frames"],
             "total_sampled": res["bp_result"]["total_sampled"],
+        }
+        out["hard_cut_summary"] = {
+            "count": res["hard_cut_result"]["count"],
+            "timestamps_sec": res["hard_cut_result"]["timestamps_sec"],
+            "max_mad": res["hard_cut_result"].get("max_mad"),
+        }
+        out["tone_cw_summary"] = {
+            "C_pct": res["tone_cw_result"]["C_pct"],
+            "M_pct": res["tone_cw_result"]["M_pct"],
+            "W_pct": res["tone_cw_result"]["W_pct"],
+            "theme": res["tone_cw_result"]["theme"],
+        }
+        out["progressive_summary"] = {
+            "na": res["progressive_result"].get("na", False),
+            "ratio": res["progressive_result"].get("ratio"),
+            "scene_total": res["progressive_result"].get("scene_total"),
+            "morph_total": res["progressive_result"].get("morph_total"),
+            "seg_count": res["progressive_result"].get("seg_count"),
         }
         print("\n" + json.dumps(out, ensure_ascii=False, indent=2))
     sys.exit(0 if res["status"] != "red" else 1)

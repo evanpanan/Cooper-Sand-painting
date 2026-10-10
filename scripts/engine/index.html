@@ -192,7 +192,8 @@
     <button class="btn" id="btnPause">⏸ 暂停</button>
     <button class="btn" id="btnStop">⏹ 停止</button>
     <button class="btn" id="btnDemo">🎬 渐进长片 38s</button>
-    <button class="btn" id="btnScene">🎭 切换模式</button>
+    <button class="btn" id="btnStartupDemo">🚀 创业整片 100s</button>
+    <button class="btn" id="btnToggleMode">🎭 切换模式</button>
   </div>
   <div class="era-indicator" id="eraIndicator">—</div>
 </div>
@@ -202,8 +203,15 @@
 <script src="transitions.js"></script>
 <script src="eras.js"></script>
 <script src="progressive_demo_schedule.js"></script>
+<script src="startup_schedule.js"></script>
 <script src="scenes/s01_classic.js"></script>
 <script src="scenes/s02_flow_mountain.js"></script>
+<script src="scenes/s03_germination_seed.js"></script>
+<script src="scenes/s04_first_order.js"></script>
+<script src="scenes/s05_hiring_team.js"></script>
+<script src="scenes/s06_crisis_storm.js"></script>
+<script src="scenes/s07_funding_breakthrough.js"></script>
+<script src="scenes/s08_brand_vision.js"></script>
 <script src="scenes/index.js"></script>
 <script src="engine.js"></script>
 
@@ -340,11 +348,25 @@
     eraIndicator.textContent = '🎬 渐进长片模式 s01→(20s手抹)→s02';
   }
 
+  function applyStartupDemo() {
+    if (!window.setProgressiveSchedule) return alert('setProgressiveSchedule 未就绪，请刷新。');
+    if (!window.STARTUP_DEMO) return alert('STARTUP_DEMO 未就绪，请刷新。');
+    var seq = window.STARTUP_DEMO();
+    window.setProgressiveSchedule(seq);
+    currentMode = 'startup_demo';
+    totalDur = window.STARTUP_DEMO_TOTAL || 0;
+    if (totalDur <= 0) { ensureEngine(); }
+    currentT = 0;
+    renderCurrent();
+    eraIndicator.textContent = '🚀 创业整片 6 段 渐进 100s';
+  }
+
   function toggleMode() {
     if (currentMode === 'eras' || currentMode === 'scene_single') {
       applyProgressiveDemo();
     } else if (currentMode === 'progressive_demo') {
-      // 切换成单 scene s02
+      applyStartupDemo();
+    } else if (currentMode === 'startup_demo') {
       if (window.setProgressiveSchedule) window.setProgressiveSchedule(null);
       currentMode = 'scene_single';
       totalDur = 0; ensureEngine();
@@ -367,7 +389,8 @@
   pauseBtn.addEventListener('click', doPause);
   stopBtn.addEventListener('click', doStop);
   if (document.getElementById('btnDemo')) document.getElementById('btnDemo').addEventListener('click', applyProgressiveDemo);
-  if (document.getElementById('btnScene')) document.getElementById('btnScene').addEventListener('click', toggleMode);
+  if (document.getElementById('btnStartupDemo')) document.getElementById('btnStartupDemo').addEventListener('click', applyStartupDemo);
+  if (document.getElementById('btnToggleMode')) document.getElementById('btnToggleMode').addEventListener('click', toggleMode);
 
   slider.addEventListener('mousedown', function() { sliderBeingDragged = true; });
   slider.addEventListener('touchstart', function() { sliderBeingDragged = true; }, { passive: true });

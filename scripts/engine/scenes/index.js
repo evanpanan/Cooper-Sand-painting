@@ -21,20 +21,28 @@
     window.SCENES['s02_flow_mountain'] = _emptyPlaceholder('s02_flow_mountain', 'realistic_cool');
   }
 
-  if (!window.SCENES['s03_river']) {
-    window.SCENES['s03_river'] = _emptyPlaceholder('s03_river', 'placeholder');
+  if (!window.SCENES['s03_germination_seed']) {
+    window.SCENES['s03_germination_seed'] = window.SCENES.s03_germination_seed || _emptyPlaceholder('s03_germination_seed', 'realistic_cool');
   }
 
-  if (!window.SCENES['s04_sunset']) {
-    window.SCENES['s04_sunset'] = _emptyPlaceholder('s04_sunset', 'placeholder');
+  if (!window.SCENES['s04_first_order']) {
+    window.SCENES['s04_first_order'] = window.SCENES.s04_first_order || _emptyPlaceholder('s04_first_order', 'realistic_cool');
   }
 
-  if (!window.SCENES['s05_ending']) {
-    window.SCENES['s05_ending'] = _emptyPlaceholder('s05_ending', 'placeholder');
+  if (!window.SCENES['s05_hiring_team']) {
+    window.SCENES['s05_hiring_team'] = window.SCENES.s05_hiring_team || _emptyPlaceholder('s05_hiring_team', 'realistic_cool');
   }
 
-  if (!window.SCENES['s06_extra']) {
-    window.SCENES['s06_extra'] = _emptyPlaceholder('s06_extra', 'placeholder');
+  if (!window.SCENES['s06_crisis_storm']) {
+    window.SCENES['s06_crisis_storm'] = window.SCENES.s06_crisis_storm || _emptyPlaceholder('s06_crisis_storm', 'realistic_cool');
+  }
+
+  if (!window.SCENES['s07_funding_breakthrough']) {
+    window.SCENES['s07_funding_breakthrough'] = window.SCENES.s07_funding_breakthrough || _emptyPlaceholder('s07_funding_breakthrough', 'realistic_cool');
+  }
+
+  if (!window.SCENES['s08_brand_vision']) {
+    window.SCENES['s08_brand_vision'] = window.SCENES.s08_brand_vision || _emptyPlaceholder('s08_brand_vision', 'realistic_cool');
   }
 
   window.SCENES.__INDEX = {

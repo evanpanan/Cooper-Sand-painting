@@ -60,6 +60,8 @@ def parse_args():
     p.add_argument("--project", type=str, default=None, help="Path to project engine directory (containing index.html)")
     p.add_argument("--progressive_demo", action="store_true",
                    help="启用 PROGRESSIVE_DEMO 38 秒渐进转场演示时间表；不传和原来一致（默认 false）")
+    p.add_argument("--startup_demo", action="store_true",
+                   help="创业题材 6 段 100s 整片演示（萌芽→首单→招人→危机→融资→品牌），真实冷光台灰沙 + 四模式渐进 + cool_cinema BGM auto")
     p.add_argument("--bgm", type=parse_bgm_mode, default="none", metavar="auto|path.wav|none",
                    help="背景音乐：none（默认不混）/ path.wav 用户指定 WAV / auto 按 spec.theme 自动选 style 并生成 BGM")
     p.add_argument("--style", choices=BGM_STYLES, default=None,
@@ -217,6 +219,11 @@ def get_duration(args, spec):
         if args.to_sec is not None:
             return min(args.to_sec, total) - args.from_sec
         return total - args.from_sec
+    if args.startup_demo:
+        total = 104.0
+        if args.to_sec is not None:
+            return min(args.to_sec, total) - args.from_sec
+        return total - args.from_sec
     if args.to_sec is not None:
         return args.to_sec - args.from_sec
     if spec and "duration" in spec:
@@ -292,6 +299,7 @@ def run_render(args):
     no_counter = "true" if args.no_counter else "false"
     long_scroll = "true" if args.long_scroll else "false"
     progressive_demo = "true" if args.progressive_demo else "false"
+    startup_demo = "true" if args.startup_demo else "false"
     progressive_schedule_json = json.dumps(PROGRESSIVE_SCHEDULE, ensure_ascii=False)
 
     out_path = Path(args.out)
@@ -368,6 +376,7 @@ def run_render(args):
                 noCounter: {no_counter},
                 longScroll: {long_scroll},
                 progressiveDemo: {progressive_demo},
+                startupDemo: {startup_demo},
                 progressiveSchedule: {progressive_schedule_json},
                 width: {width},
                 height: {height},
@@ -394,6 +403,12 @@ def run_render(args):
                 page.evaluate(f"if (typeof setProgressiveSchedule === 'function') {{ setProgressiveSchedule({progressive_schedule_json}); }}")
             except Exception as e:
                 print(f"[render] Info: setProgressiveSchedule 未定义 (页面未实现渐进演示函数): {e}", file=sys.stderr)
+
+        if args.startup_demo:
+            try:
+                page.evaluate("if (typeof setProgressiveSchedule === 'function' && typeof window.STARTUP_DEMO === 'function') { setProgressiveSchedule(window.STARTUP_DEMO()); }")
+            except Exception as e:
+                print(f"[render] Info: setProgressiveSchedule / STARTUP_DEMO 未定义 (页面未实现创业演示函数): {e}", file=sys.stderr)
 
         time.sleep(0.5)
 
@@ -530,8 +545,8 @@ def run_render(args):
 
 def main():
     args = parse_args()
-    if not args.solo and not args.spec and not args.project and not args.progressive_demo:
-        print("[WARNING] No --solo, --spec, --progressive_demo, or --project provided; will try default", file=sys.stderr)
+    if not args.solo and not args.spec and not args.project and not args.progressive_demo and not args.startup_demo:
+        print("[WARNING] No --solo, --spec, --progressive_demo, --startup_demo, or --project provided; will try default", file=sys.stderr)
     run_render(args)
 
 
