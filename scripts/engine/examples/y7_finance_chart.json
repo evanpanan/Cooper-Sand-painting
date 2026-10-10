@@ -1,8 +1,8 @@
 {
   "grammar": "y7_finance_chart",
   "version": "1.0",
-  "theme": "classic_warm",
-  "palette_name": "暖沙标准-5色",
+  "theme": "realistic_cool",
+  "palette_name": "写实冷光台-5色",
   "lightTable": "#F5D080",
   "sandColors": [
     "#8B5A2B",
@@ -16,12 +16,25 @@
   "thickSandAlpha": 0.92,
   "grainSize": 2.5,
   "duration": 7.5,
-  "resolution": [1920, 1080],
+  "resolution": [
+    1920,
+    1080
+  ],
   "fps": 30,
   "chart_type": "bar",
-  "chart_area": [200, 180, 1720, 840],
+  "chart_area": [
+    200,
+    180,
+    1720,
+    840
+  ],
   "axis": {
-    "x_labels": ["Q1", "Q2", "Q3", "Q4"],
+    "x_labels": [
+      "Q1",
+      "Q2",
+      "Q3",
+      "Q4"
+    ],
     "y_max": 110,
     "y_step": 20,
     "x_label_size": 28,
@@ -30,8 +43,18 @@
     "tick_line_width": 2,
     "axis_appear_duration": 0.5
   },
-  "data": [30, 45, 60, 88],
-  "data_colors_idx": [2, 2, 2, 0],
+  "data": [
+    30,
+    45,
+    60,
+    88
+  ],
+  "data_colors_idx": [
+    2,
+    2,
+    2,
+    0
+  ],
   "data_appear_order": "one_by_one",
   "data_appear_duration": 4.5,
   "bar_gap_pct": 0.35,
@@ -47,7 +70,10 @@
       "idx": 3,
       "label": "历史新高",
       "t": 5.0,
-      "label_pos": [1520, 300],
+      "label_pos": [
+        1520,
+        300
+      ],
       "label_size": 36,
       "label_weight": 700,
       "arrow_to_bar_top": true,
@@ -58,7 +84,10 @@
   "total_number": {
     "text": "总营收 2.23 亿",
     "appearedAt": 6.5,
-    "pos": [960, 900],
+    "pos": [
+      960,
+      900
+    ],
     "size": 96,
     "weight": 800,
     "align": "center",
@@ -68,13 +97,29 @@
   },
   "chart_title": {
     "text": "2026 年度营收（单位：百万）",
-    "pos": [960, 130],
+    "pos": [
+      960,
+      130
+    ],
     "size": 36,
     "weight": 500,
     "appearedAt": 0.2
   },
   "motifs": [
-    {"id": "m4", "area": [200, 180, 1720, 840], "freq": 10},
-    {"id": "m5", "amp": 0.05, "freq": 0.3}
+    {
+      "id": "m4",
+      "area": [
+        200,
+        180,
+        1720,
+        840
+      ],
+      "freq": 10
+    },
+    {
+      "id": "m5",
+      "amp": 0.05,
+      "freq": 0.3
+    }
   ]
 }

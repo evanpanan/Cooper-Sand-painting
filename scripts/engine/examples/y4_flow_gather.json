@@ -1,8 +1,8 @@
 {
   "grammar": "y4_flow_gather",
   "version": "1.0",
-  "theme": "classic_warm",
-  "palette_name": "暖沙标准-5色",
+  "theme": "realistic_cool",
+  "palette_name": "写实冷光台-5色",
   "lightTable": "#F5D080",
   "sandColors": [
     "#8B5A2B",
@@ -16,7 +16,10 @@
   "thickSandAlpha": 0.92,
   "grainSize": 2.5,
   "duration": 6.0,
-  "resolution": [1920, 1080],
+  "resolution": [
+    1920,
+    1080
+  ],
   "fps": 30,
   "target_shape": "circle_at_960_540_r_240",
   "target_shape_scale_anim": {
@@ -55,7 +58,10 @@
   "text": {
     "main": "3亿用户",
     "sub": "2026年Q2达成",
-    "pos": [960, 540],
+    "pos": [
+      960,
+      540
+    ],
     "size": 200,
     "weight": 800,
     "align": "center",
@@ -67,7 +73,16 @@
     "animationDuration": 0.7
   },
   "motifs": [
-    {"id": "m2", "path": "arc_spiral", "speed": 0.8, "t": 0},
-    {"id": "m5", "amp": 0.07, "freq": 0.35}
+    {
+      "id": "m2",
+      "path": "arc_spiral",
+      "speed": 0.8,
+      "t": 0
+    },
+    {
+      "id": "m5",
+      "amp": 0.07,
+      "freq": 0.35
+    }
   ]
 }

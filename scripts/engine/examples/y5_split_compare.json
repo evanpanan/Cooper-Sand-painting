@@ -1,8 +1,8 @@
 {
   "grammar": "y5_split_compare",
   "version": "1.0",
-  "theme": "classic_warm",
-  "palette_name": "暖沙标准-5色",
+  "theme": "realistic_cool",
+  "palette_name": "写实冷光台-5色",
   "lightTable": "#F5D080",
   "sandColors": [
     "#8B5A2B",
@@ -16,7 +16,10 @@
   "thickSandAlpha": 0.92,
   "grainSize": 2.5,
   "duration": 7.0,
-  "resolution": [1920, 1080],
+  "resolution": [
+    1920,
+    1080
+  ],
   "fps": 30,
   "split_at_x": 960,
   "split_line_style": "thick_scratch",
@@ -27,15 +30,37 @@
   "left": {
     "sandColorIdx": 0,
     "title": "2018",
-    "title_pos": [480, 220],
+    "title_pos": [
+      480,
+      220
+    ],
     "title_size": 96,
     "title_weight": 800,
     "body": [
-      {"text": "3人小团队", "pos": [480, 500], "size": 48, "weight": 500},
-      {"text": "1款产品", "pos": [480, 600], "size": 48, "weight": 500}
+      {
+        "text": "3人小团队",
+        "pos": [
+          480,
+          500
+        ],
+        "size": 48,
+        "weight": 500
+      },
+      {
+        "text": "1款产品",
+        "pos": [
+          480,
+          600
+        ],
+        "size": 48,
+        "weight": 500
+      }
     ],
     "icon": "old_tv",
-    "icon_pos": [480, 380],
+    "icon_pos": [
+      480,
+      380
+    ],
     "icon_scale": 1.2,
     "doodle": "sketch_lines",
     "doodle_density": 0.7
@@ -43,22 +68,47 @@
   "right": {
     "sandColorIdx": 2,
     "title": "2026",
-    "title_pos": [1440, 220],
+    "title_pos": [
+      1440,
+      220
+    ],
     "title_size": 96,
     "title_weight": 800,
     "body": [
-      {"text": "3亿全球用户", "pos": [1440, 500], "size": 48, "weight": 500},
-      {"text": "50+产品线", "pos": [1440, 600], "size": 48, "weight": 500}
+      {
+        "text": "3亿全球用户",
+        "pos": [
+          1440,
+          500
+        ],
+        "size": 48,
+        "weight": 500
+      },
+      {
+        "text": "50+产品线",
+        "pos": [
+          1440,
+          600
+        ],
+        "size": 48,
+        "weight": 500
+      }
     ],
     "icon": "rocket",
-    "icon_pos": [1440, 380],
+    "icon_pos": [
+      1440,
+      380
+    ],
     "icon_scale": 1.2,
     "doodle": "stars",
     "doodle_density": 0.8
   },
   "vs_label": {
     "text": "VS",
-    "pos": [960, 540],
+    "pos": [
+      960,
+      540
+    ],
     "size": 100,
     "weight": 900,
     "appearedAt": 1.8,
@@ -66,7 +116,21 @@
     "animationDuration": 0.4
   },
   "motifs": [
-    {"id": "m3", "line": "vertical_center", "growth": 1.0, "t": 0},
-    {"id": "m4", "area": [200, 150, 1720, 900], "freq": 11}
+    {
+      "id": "m3",
+      "line": "vertical_center",
+      "growth": 1.0,
+      "t": 0
+    },
+    {
+      "id": "m4",
+      "area": [
+        200,
+        150,
+        1720,
+        900
+      ],
+      "freq": 11
+    }
   ]
 }

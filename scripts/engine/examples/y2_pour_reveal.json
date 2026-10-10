@@ -1,8 +1,8 @@
 {
   "grammar": "y2_pour_reveal",
   "version": "1.0",
-  "theme": "classic_warm",
-  "palette_name": "暖沙标准-5色",
+  "theme": "realistic_cool",
+  "palette_name": "写实冷光台-5色",
   "lightTable": "#F5D080",
   "sandColors": [
     "#8B5A2B",
@@ -16,7 +16,10 @@
   "thickSandAlpha": 0.92,
   "grainSize": 2.5,
   "duration": 5.0,
-  "resolution": [1920, 1080],
+  "resolution": [
+    1920,
+    1080
+  ],
   "fps": 30,
   "pour_from": "top",
   "pour_endAt": 0.6,
@@ -28,7 +31,10 @@
   "reveal_startAt": 0.5,
   "text_main": {
     "content": "Cooper Sand Art",
-    "pos": [960, 480],
+    "pos": [
+      960,
+      480
+    ],
     "size": 120,
     "weight": 700,
     "align": "center",
@@ -38,7 +44,10 @@
   },
   "text_sub": {
     "content": "2018 – 2026 从沙中诞生",
-    "pos": [960, 620],
+    "pos": [
+      960,
+      620
+    ],
     "size": 48,
     "weight": 400,
     "align": "center",
@@ -49,11 +58,24 @@
   "doodle_under": {
     "type": "flower_bloom",
     "scale": 0.8,
-    "pos": [960, 540],
+    "pos": [
+      960,
+      540
+    ],
     "appearedAt": 3.0
   },
   "motifs": [
-    {"id": "m1", "x": 960, "y": 60, "amount": 0.7, "t": 0},
-    {"id": "m5", "amp": 0.05, "freq": 0.3}
+    {
+      "id": "m1",
+      "x": 960,
+      "y": 60,
+      "amount": 0.7,
+      "t": 0
+    },
+    {
+      "id": "m5",
+      "amp": 0.05,
+      "freq": 0.3
+    }
   ]
 }

@@ -5,16 +5,16 @@
   }
 
   function drawLightTable(c, W, H, lt, t) {
-    const breath = 0.985 + Math.sin(t * 1.1) * 0.015;
-    const r = Math.floor((25 + 18 * lt) * breath);
-    const g = Math.floor((19 + 14 * lt) * breath);
-    const b = Math.floor((10 + 8 * lt) * breath);
+    const breath = 0.98 + Math.sin(t * 1.1) * 0.02;
+    const r = Math.floor((0 + 20 * lt) * breath);
+    const g = Math.floor((32 + 58 * lt) * breath);
+    const b = Math.floor((64 + 81 * lt) * breath);
     c.fillStyle = `rgb(${r},${g},${b})`;
     c.fillRect(0, 0, W, H);
 
     const vig = c.createRadialGradient(W / 2, H / 2, Math.min(W, H) * 0.08 * breath, W / 2, H / 2, Math.max(W, H) * 0.78 * breath);
-    vig.addColorStop(0, `rgba(${r + 7},${g + 5},${b + 3},0)`);
-    vig.addColorStop(1, `rgba(${Math.max(0, r - 14)},${Math.max(0, g - 12)},${Math.max(0, b - 6)},0.52)`);
+    vig.addColorStop(0, `rgba(${Math.min(255, r + 20)},${Math.min(255, g + 32)},${Math.min(255, b + 42)},0)`);
+    vig.addColorStop(1, `rgba(${Math.max(0, r - 10)},${Math.max(0, g - 30)},${Math.max(0, b - 55)},0.52)`);
     c.fillStyle = vig;
     c.fillRect(0, 0, W, H);
 
@@ -25,7 +25,7 @@
       const y = rand(seed + 1) * H;
       const a = (0.05 + rand(seed + 2) * 0.12) * (0.5 + 0.5 * Math.sin(t * 2.2 + i));
       if (a > 0) {
-        c.fillStyle = `rgba(${Math.floor(245 * lt)},${Math.floor(230 * lt)},${Math.floor(190 * lt)},${a})`;
+        c.fillStyle = `rgba(${Math.floor(0 * lt)},${Math.floor(128 * lt)},${Math.floor(165 * lt)},${a})`;
         c.beginPath();
         c.arc(x, y, 0.4 + rand(seed + 3) * 1.2, 0, Math.PI * 2);
         c.fill();
@@ -47,9 +47,9 @@
           const x = col * gridSize + r2 * gridSize;
           const y = row * gridSize + r3 * gridSize;
           const density = 0.28 + r1 * 0.32;
-          const sr = 172 + Math.floor(r2 * 24);
-          const sg = 135 + Math.floor(r3 * 20);
-          const sb = 78 + Math.floor(r1 * 18);
+          const sr = 176 + Math.floor(r2 * 24);
+          const sg = 184 + Math.floor(r3 * 20);
+          const sb = 168 + Math.floor(r1 * 18);
           c.fillStyle = `rgba(${Math.floor(sr * lt)},${Math.floor(sg * lt)},${Math.floor(sb * lt)},${density})`;
           c.fillRect(x, y, gridSize * 0.52, gridSize * 0.52);
         }
@@ -63,9 +63,9 @@
       const y = rand(seed + 1) * H;
       const size = 0.25 + rand(seed + 2) * 1.1;
       const alpha = (0.06 + rand(seed + 3) * 0.22);
-      const gr = 162 + Math.floor(rand(seed + 4) * 42);
-      const gg = 125 + Math.floor(rand(seed + 5) * 32);
-      const gb = 68 + Math.floor(rand(seed + 6) * 26);
+      const gr = 146 + Math.floor(rand(seed + 4) * 42);
+      const gg = 154 + Math.floor(rand(seed + 5) * 32);
+      const gb = 138 + Math.floor(rand(seed + 6) * 26);
       c.fillStyle = `rgba(${Math.floor(gr * lt)},${Math.floor(gg * lt)},${Math.floor(gb * lt)},${alpha})`;
       c.beginPath();
       c.arc(x, y, size, 0, Math.PI * 2);
@@ -106,9 +106,9 @@
         }
       }
       c.closePath();
-      const pr = 152 + Math.floor(rand(baseJitterSeed + 900) * 18);
-      const pg = 108 + Math.floor(rand(baseJitterSeed + 901) * 16);
-      const pb = 58 + Math.floor(rand(baseJitterSeed + 902) * 14);
+      const pr = 150 + Math.floor(rand(baseJitterSeed + 900) * 18);
+      const pg = 158 + Math.floor(rand(baseJitterSeed + 901) * 16);
+      const pb = 138 + Math.floor(rand(baseJitterSeed + 902) * 14);
       c.fillStyle = `rgba(${Math.floor(pr * lt)},${Math.floor(pg * lt)},${Math.floor(pb * lt)},0.58)`;
       c.fill();
 
@@ -126,8 +126,8 @@
         if (t >= 0 && t <= 1 && Math.abs(offset) <= widthVar / 2) {
           const density = 0.15 + rand(seedF + 4) * 0.35;
           const dr = 162 + Math.floor(rand(seedF + 5) * 22);
-          const dg = 118 + Math.floor(rand(seedF + 6) * 18);
-          const db = 65 + Math.floor(rand(seedF + 7) * 16);
+          const dg = 170 + Math.floor(rand(seedF + 6) * 18);
+          const db = 150 + Math.floor(rand(seedF + 7) * 16);
           c.fillStyle = `rgba(${Math.floor(dr * lt)},${Math.floor(dg * lt)},${Math.floor(db * lt)},${density})`;
           c.beginPath();
           c.arc(px, py, 0.5 + rand(seedF + 8) * 1.8, 0, Math.PI * 2);
@@ -149,8 +149,8 @@
         const py = midY + Math.sin(perpA) * sidePick * (widthVar / 2) * edgeInset + (rand(seedE + 4) - 0.5) * 4;
         const alpha = (0.12 + rand(seedE + 5) * 0.28) * (1 - edgeInset * 0.4);
         const er = 195 + Math.floor(rand(seedE + 6) * 25);
-        const eg = 155 + Math.floor(rand(seedE + 7) * 20);
-        const eb = 95 + Math.floor(rand(seedE + 8) * 18);
+        const eg = 200 + Math.floor(rand(seedE + 7) * 20);
+        const eb = 183 + Math.floor(rand(seedE + 8) * 18);
         c.fillStyle = `rgba(${Math.floor(er * lt)},${Math.floor(eg * lt)},${Math.floor(eb * lt)},${alpha})`;
         c.beginPath();
         c.arc(px, py, 0.6 + rand(seedE + 9) * 2, 0, Math.PI * 2);
@@ -170,9 +170,9 @@
         const x = cx + Math.cos(ang) * dist + (rand(seedC + 2) - 0.5) * 5;
         const y = cy + Math.sin(ang) * dist + (rand(seedC + 3) - 0.5) * 5;
         const fade = 1 - dist / layerR * 0.6;
-        const cr = 115 + Math.floor(rand(seedC + 4) * 25);
-        const cg = 78 + Math.floor(rand(seedC + 5) * 18);
-        const cb = 38 + Math.floor(rand(seedC + 6) * 14);
+        const cr = 123 + Math.floor(rand(seedC + 4) * 25);
+        const cg = 131 + Math.floor(rand(seedC + 5) * 18);
+        const cb = 112 + Math.floor(rand(seedC + 6) * 14);
         const alpha = layerAlpha * fade * (0.35 + rand(seedC + 7) * 0.65);
         c.fillStyle = `rgba(${Math.floor(cr * lt)},${Math.floor(cg * lt)},${Math.floor(cb * lt)},${alpha})`;
         c.beginPath();
@@ -189,9 +189,9 @@
       const x = cx + Math.cos(ang) * dist;
       const y = cy + Math.sin(ang) * dist;
       const fade = 1 - dist / dabR * 0.5;
-      const dr = 80 + Math.floor(rand(seedD + 2) * 22);
-      const dg = 52 + Math.floor(rand(seedD + 3) * 16);
-      const db = 24 + Math.floor(rand(seedD + 4) * 12);
+      const dr = 108 + Math.floor(rand(seedD + 2) * 22);
+      const dg = 114 + Math.floor(rand(seedD + 3) * 16);
+      const db = 96 + Math.floor(rand(seedD + 4) * 12);
       const alpha = (0.45 + rand(seedD + 5) * 0.4) * fade;
       c.fillStyle = `rgba(${Math.floor(dr * lt)},${Math.floor(dg * lt)},${Math.floor(db * lt)},${alpha})`;
       c.beginPath();
@@ -206,8 +206,8 @@
       const x = cx + Math.cos(ang) * jr;
       const y = cy + Math.sin(ang) * jr;
       const hr = 185 + Math.floor(rand(seedH + 1) * 30);
-      const hg = 142 + Math.floor(rand(seedH + 2) * 22);
-      const hb = 85 + Math.floor(rand(seedH + 3) * 18);
+      const hg = 188 + Math.floor(rand(seedH + 2) * 22);
+      const hb = 174 + Math.floor(rand(seedH + 3) * 18);
       c.fillStyle = `rgba(${Math.floor(hr * lt)},${Math.floor(hg * lt)},${Math.floor(hb * lt)},${0.15 + rand(seedH + 4) * 0.25})`;
       c.beginPath();
       c.arc(x, y, 0.8 + rand(seedH + 5) * 2.5, 0, Math.PI * 2);
@@ -232,7 +232,7 @@
         const veinOffset = (v - (veinCount - 1) / 2) * (petalWidth * 0.18);
         const veinSeed = baseSeed + v * 47;
         const steps = 18;
-        c.strokeStyle = `rgba(${Math.floor(128 * lt)},${Math.floor(88 * lt)},${Math.floor(48 * lt)},0.45)`;
+        c.strokeStyle = `rgba(${Math.floor(138 * lt)},${Math.floor(146 * lt)},${Math.floor(126 * lt)},0.45)`;
         c.lineWidth = 1.8;
         c.lineCap = 'round';
         c.beginPath();
@@ -261,9 +261,9 @@
           const px = midX + Math.cos(perpA) * (veinOffset + veinWander + distFromLine);
           const py = midY + Math.sin(perpA) * (veinOffset + veinWander + distFromLine);
           const alpha = (0.12 + rand(seed + 2) * 0.22) * taper;
-          const dr = 138 + Math.floor(rand(seed + 3) * 20);
-          const dg = 96 + Math.floor(rand(seed + 4) * 16);
-          const db = 52 + Math.floor(rand(seed + 5) * 12);
+          const dr = 148 + Math.floor(rand(seed + 3) * 20);
+          const dg = 156 + Math.floor(rand(seed + 4) * 16);
+          const db = 134 + Math.floor(rand(seed + 5) * 12);
           c.fillStyle = `rgba(${Math.floor(dr * lt)},${Math.floor(dg * lt)},${Math.floor(db * lt)},${alpha})`;
           c.beginPath();
           c.arc(px, py, 0.4 + rand(seed + 6) * 1.4, 0, Math.PI * 2);
@@ -285,9 +285,9 @@
         const px = midX + Math.cos(perpA) * offset * (petalWidth * 0.45 * taper) * edgeDist;
         const py = midY + Math.sin(perpA) * offset * (petalWidth * 0.45 * taper) * edgeDist;
         const darkness = rand(seed + 3);
-        const dr = 115 + Math.floor(darkness * 28);
-        const dg = 78 + Math.floor(darkness * 22);
-        const db = 42 + Math.floor(darkness * 16);
+        const dr = 125 + Math.floor(darkness * 28);
+        const dg = 133 + Math.floor(darkness * 22);
+        const db = 110 + Math.floor(darkness * 16);
         const alpha = (0.08 + rand(seed + 4) * 0.18) * taper;
         c.fillStyle = `rgba(${Math.floor(dr * lt)},${Math.floor(dg * lt)},${Math.floor(db * lt)},${alpha})`;
         c.beginPath();
@@ -315,7 +315,7 @@
       c.lineCap = 'round';
 
       for (let pass = 0; pass < 3; pass++) {
-        c.strokeStyle = `rgba(${Math.floor(248 * lt)},${Math.floor(232 * lt)},${Math.floor(192 * lt)},${0.28 - pass * 0.06})`;
+        c.strokeStyle = `rgba(${Math.floor(0 * lt)},${Math.floor(128 * lt)},${Math.floor(165 * lt)},${0.28 - pass * 0.06})`;
         c.lineWidth = 3.5 - pass * 0.8;
         c.beginPath();
         for (let s = 0; s <= scratchSteps; s++) {
@@ -349,9 +349,9 @@
         const fade = (1 - distNorm) * taper;
         const alpha = (0.1 + rand(seed + 2) * 0.2) * fade;
         if (alpha > 0) {
-          const gr = 250;
-          const gg = 238;
-          const gb = 200;
+          const gr = 0;
+          const gg = 135;
+          const gb = 170;
           c.fillStyle = `rgba(${Math.floor(gr * lt)},${Math.floor(gg * lt)},${Math.floor(gb * lt)},${alpha})`;
           c.beginPath();
           c.arc(px, py, 0.5 + rand(seed + 3) * 1.8, 0, Math.PI * 2);
@@ -373,9 +373,9 @@
           const py = midY + Math.sin(perpA) * (wander + side * pushDist);
           const fade = taper * (1 - (pushDist - 6) / 14 * 0.6);
           const alpha = (0.12 + rand(seed + 2) * 0.22) * fade;
-          const pr = 150 + Math.floor(rand(seed + 3) * 25);
-          const pg = 108 + Math.floor(rand(seed + 4) * 18);
-          const pb = 58 + Math.floor(rand(seed + 5) * 15);
+          const pr = 148 + Math.floor(rand(seed + 3) * 25);
+          const pg = 156 + Math.floor(rand(seed + 4) * 18);
+          const pb = 136 + Math.floor(rand(seed + 5) * 15);
           c.fillStyle = `rgba(${Math.floor(pr * lt)},${Math.floor(pg * lt)},${Math.floor(pb * lt)},${alpha})`;
           c.beginPath();
           c.arc(px, py, 0.7 + rand(seed + 6) * 2, 0, Math.PI * 2);
@@ -388,7 +388,7 @@
     const circleCY = cy;
     const circleR = 30;
     for (let pass = 0; pass < 3; pass++) {
-      c.strokeStyle = `rgba(${Math.floor(250 * lt)},${Math.floor(235 * lt)},${Math.floor(195 * lt)},${0.32 - pass * 0.07})`;
+      c.strokeStyle = `rgba(${Math.floor(0 * lt)},${Math.floor(130 * lt)},${Math.floor(168 * lt)},${0.32 - pass * 0.07})`;
       c.lineWidth = 3 - pass * 0.7;
       c.beginPath();
       const steps = 48;
@@ -414,7 +414,7 @@
       const fade = 1 - distNorm;
       const alpha = (0.08 + rand(seed + 2) * 0.18) * fade;
       if (alpha > 0) {
-        c.fillStyle = `rgba(${Math.floor(252 * lt)},${Math.floor(240 * lt)},${Math.floor(205 * lt)},${alpha})`;
+        c.fillStyle = `rgba(${Math.floor(0 * lt)},${Math.floor(138 * lt)},${Math.floor(175 * lt)},${alpha})`;
         c.beginPath();
         c.arc(x, y, 0.4 + rand(seed + 3) * 1.6, 0, Math.PI * 2);
         c.fill();
@@ -443,9 +443,9 @@
           const px = x + (rand(seedS + i * 5 + j) - 0.5) * 6;
           const py = y + (rand(seedS + i * 5 + j + 11) - 0.5) * 4;
           const size = 0.5 + rand(seedS + i * 5 + j + 23) * 1.8;
-          const sr = 168 + Math.floor(rand(seedS + i + j * 2 + 47) * 24);
-          const sg = 128 + Math.floor(rand(seedS + i + j * 2 + 48) * 20);
-          const sb = 72 + Math.floor(rand(seedS + i + j * 2 + 49) * 18);
+          const sr = 172 + Math.floor(rand(seedS + i + j * 2 + 47) * 24);
+          const sg = 180 + Math.floor(rand(seedS + i + j * 2 + 48) * 20);
+          const sb = 156 + Math.floor(rand(seedS + i + j * 2 + 49) * 18);
           c.fillStyle = `rgba(${Math.floor(sr * lt)},${Math.floor(sg * lt)},${Math.floor(sb * lt)},${density * fade})`;
           c.beginPath();
           c.arc(px, py, size, 0, Math.PI * 2);
@@ -464,9 +464,9 @@
       const fade = 1 - dist / 85 * 0.6;
       const yBias = Math.max(0, (y - (cy - 20)) / 80);
       const alpha = (0.18 + rand(seed + 4) * 0.32) * fade * (0.6 + yBias * 0.4);
-      const pr = 148 + Math.floor(rand(seed + 5) * 28);
-      const pg = 105 + Math.floor(rand(seed + 6) * 20);
-      const pb = 56 + Math.floor(rand(seed + 7) * 16);
+      const pr = 152 + Math.floor(rand(seed + 5) * 28);
+      const pg = 160 + Math.floor(rand(seed + 6) * 20);
+      const pb = 138 + Math.floor(rand(seed + 7) * 16);
       c.fillStyle = `rgba(${Math.floor(pr * lt)},${Math.floor(pg * lt)},${Math.floor(pb * lt)},${alpha})`;
       c.beginPath();
       c.arc(x, y, 0.6 + rand(seed + 8) * 2.2, 0, Math.PI * 2);
@@ -486,9 +486,9 @@
       const y = startY + (endY - startY) * t + (rand(seed + 3) - 0.5) * 3;
       const alpha = (0.12 + rand(seed + 4) * 0.2) * (1 - t * 0.7);
       if (alpha > 0) {
-        const sr = 178 + Math.floor(rand(seed + 5) * 22);
-        const sg = 138 + Math.floor(rand(seed + 6) * 18);
-        const sb = 82 + Math.floor(rand(seed + 7) * 15);
+        const sr = 182 + Math.floor(rand(seed + 5) * 22);
+        const sg = 188 + Math.floor(rand(seed + 6) * 18);
+        const sb = 170 + Math.floor(rand(seed + 7) * 15);
         c.fillStyle = `rgba(${Math.floor(sr * lt)},${Math.floor(sg * lt)},${Math.floor(sb * lt)},${alpha})`;
         c.beginPath();
         c.arc(x, y, 0.5 + rand(seed + 8) * 1.5, 0, Math.PI * 2);
@@ -512,7 +512,7 @@
     const perpA = topAngle + Math.PI / 2;
 
     for (let pass = 0; pass < 3; pass++) {
-      c.strokeStyle = `rgba(${Math.floor(247 * lt)},${Math.floor(230 * lt)},${Math.floor(190 * lt)},${0.26 - pass * 0.05})`;
+      c.strokeStyle = `rgba(${Math.floor(0 * lt)},${Math.floor(125 * lt)},${Math.floor(162 * lt)},${0.26 - pass * 0.05})`;
       c.lineWidth = 3 - pass * 0.7;
       c.lineCap = 'round';
       c.beginPath();
@@ -545,7 +545,7 @@
       const fade = (1 - distNorm) * Math.sin(st * Math.PI);
       const alpha = (0.09 + rand(seed + 2) * 0.18) * fade;
       if (alpha > 0) {
-        c.fillStyle = `rgba(${Math.floor(250 * lt)},${Math.floor(238 * lt)},${Math.floor(198 * lt)},${alpha})`;
+        c.fillStyle = `rgba(${Math.floor(0 * lt)},${Math.floor(132 * lt)},${Math.floor(168 * lt)},${alpha})`;
         c.beginPath();
         c.arc(px, py, 0.4 + rand(seed + 3) * 1.5, 0, Math.PI * 2);
         c.fill();
@@ -566,8 +566,8 @@
         const fade = (1 - (pushDist - 5) / 11 * 0.5) * (0.5 + st * 0.5);
         const alpha = (0.1 + rand(seed + 2) * 0.2) * fade;
         const pr = 155 + Math.floor(rand(seed + 3) * 22);
-        const pg = 112 + Math.floor(rand(seed + 4) * 16);
-        const pb = 60 + Math.floor(rand(seed + 5) * 14);
+        const pg = 162 + Math.floor(rand(seed + 4) * 16);
+        const pb = 140 + Math.floor(rand(seed + 5) * 14);
         c.fillStyle = `rgba(${Math.floor(pr * lt)},${Math.floor(pg * lt)},${Math.floor(pb * lt)},${alpha})`;
         c.beginPath();
         c.arc(px, py, 0.5 + rand(seed + 6) * 1.8, 0, Math.PI * 2);
@@ -585,8 +585,8 @@
       const fade = 1 - dist / 22 * 0.5;
       const alpha = (0.12 + rand(seed + 4) * 0.25) * fade;
       const pr = 160 + Math.floor(rand(seed + 5) * 25);
-      const pg = 118 + Math.floor(rand(seed + 6) * 18);
-      const pb = 64 + Math.floor(rand(seed + 7) * 15);
+      const pg = 168 + Math.floor(rand(seed + 6) * 18);
+      const pb = 146 + Math.floor(rand(seed + 7) * 15);
       c.fillStyle = `rgba(${Math.floor(pr * lt)},${Math.floor(pg * lt)},${Math.floor(pb * lt)},${alpha})`;
       c.beginPath();
       c.arc(x, y, 0.5 + rand(seed + 8) * 2, 0, Math.PI * 2);
@@ -594,11 +594,14 @@
     }
   }
 
+  // 使用 palette('realistic_cool_standard')：冷蓝青光台+冷灰沙粒，真实样片同款
+  // const C = (typeof SAND !== 'undefined' && SAND.palette) ? SAND.palette('realistic_cool_standard') : null;
   window.SCENES = window.SCENES || {};
   window.SCENES['s01_classic'] = {
     meta: {
-      name: '经典暖调六瓣花',
-      style: 'classic_warm',
+      name: '真实写实冷调六瓣花',
+      style: 'realistic_cool',
+      palette_name: 'realistic_cool_standard',
       layers: 6
     },
     draw(c, lt, t) {

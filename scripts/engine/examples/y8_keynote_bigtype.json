@@ -1,8 +1,8 @@
 {
   "grammar": "y8_keynote_bigtype",
   "version": "1.0",
-  "theme": "classic_warm",
-  "palette_name": "暖沙米金-5色",
+  "theme": "realistic_cool",
+  "palette_name": "写实冷光台-海岸-5色",
   "lightTable": "#F9E5B0",
   "sandColors": [
     "#9C7A48",
@@ -16,12 +16,18 @@
   "thickSandAlpha": 0.93,
   "grainSize": 2.8,
   "duration": 4.5,
-  "resolution": [1920, 1080],
+  "resolution": [
+    1920,
+    1080
+  ],
   "fps": 30,
   "main_word": "长期主义",
   "main_size": 260,
   "main_weight": 900,
-  "main_pos": [960, 480],
+  "main_pos": [
+    960,
+    480
+  ],
   "main_color_sandIdx": 0,
   "slam_t": 0.5,
   "slam_scale": 1.6,
@@ -33,7 +39,10 @@
   "sub_word": "做时间的朋友",
   "sub_size": 64,
   "sub_weight": 500,
-  "sub_pos": [960, 720],
+  "sub_pos": [
+    960,
+    720
+  ],
   "sub_color_sandIdx": 2,
   "sub_appearedAt": 2.2,
   "sub_animation": "fade_in_up",
@@ -49,8 +58,14 @@
   "corner_doodle": {
     "enabled": true,
     "type": "hourglass_branches",
-    "posTL": [180, 180],
-    "posBR": [1740, 900],
+    "posTL": [
+      180,
+      180
+    ],
+    "posBR": [
+      1740,
+      900
+    ],
     "scale": 0.7,
     "sandColorIdx": 3,
     "alpha": 0.5,
@@ -66,7 +81,20 @@
     "alpha_decay": 0.7
   },
   "motifs": [
-    {"id": "m5", "amp": 0.08, "freq": 0.45},
-    {"id": "m4", "area": [200, 200, 1720, 900], "freq": 12}
+    {
+      "id": "m5",
+      "amp": 0.08,
+      "freq": 0.45
+    },
+    {
+      "id": "m4",
+      "area": [
+        200,
+        200,
+        1720,
+        900
+      ],
+      "freq": 12
+    }
   ]
 }

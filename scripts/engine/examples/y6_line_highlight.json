@@ -1,8 +1,8 @@
 {
   "grammar": "y6_line_highlight",
   "version": "1.0",
-  "theme": "classic_warm",
-  "palette_name": "暖沙标准-5色",
+  "theme": "realistic_cool",
+  "palette_name": "写实冷光台-5色",
   "lightTable": "#F5D080",
   "sandColors": [
     "#8B5A2B",
@@ -16,12 +16,18 @@
   "thickSandAlpha": 0.92,
   "grainSize": 3.0,
   "duration": 7.5,
-  "resolution": [1920, 1080],
+  "resolution": [
+    1920,
+    1080
+  ],
   "fps": 30,
   "poem_title": {
     "text": "静夜思",
     "author": "李白",
-    "pos": [960, 160],
+    "pos": [
+      960,
+      160
+    ],
     "title_size": 56,
     "author_size": 32,
     "appearedAt": 0.3
@@ -30,7 +36,10 @@
     {
       "line_idx": 0,
       "text": "床前明月光，",
-      "pos": [960, 340],
+      "pos": [
+        960,
+        340
+      ],
       "size": 72,
       "weight": 500,
       "align": "center",
@@ -40,7 +49,10 @@
     {
       "line_idx": 1,
       "text": "疑是地上霜。",
-      "pos": [960, 460],
+      "pos": [
+        960,
+        460
+      ],
       "size": 72,
       "weight": 500,
       "align": "center",
@@ -50,7 +62,10 @@
     {
       "line_idx": 2,
       "text": "举头望明月，",
-      "pos": [960, 580],
+      "pos": [
+        960,
+        580
+      ],
       "size": 72,
       "weight": 500,
       "align": "center",
@@ -60,7 +75,10 @@
     {
       "line_idx": 3,
       "text": "低头思故乡。",
-      "pos": [960, 700],
+      "pos": [
+        960,
+        700
+      ],
       "size": 72,
       "weight": 500,
       "align": "center",
@@ -104,13 +122,29 @@
   ],
   "background_doodle": {
     "type": "moon_and_window",
-    "pos": [1600, 220],
+    "pos": [
+      1600,
+      220
+    ],
     "scale": 0.9,
     "alpha": 0.35,
     "appearedAt": 0.5
   },
   "motifs": [
-    {"id": "m5", "amp": 0.04, "freq": 0.25},
-    {"id": "m4", "area": [300, 280, 1620, 780], "freq": 8}
+    {
+      "id": "m5",
+      "amp": 0.04,
+      "freq": 0.25
+    },
+    {
+      "id": "m4",
+      "area": [
+        300,
+        280,
+        1620,
+        780
+      ],
+      "freq": 8
+    }
   ]
 }
