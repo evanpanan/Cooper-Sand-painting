@@ -191,6 +191,8 @@
     <button class="btn primary" id="btnPlay">▶ 播放</button>
     <button class="btn" id="btnPause">⏸ 暂停</button>
     <button class="btn" id="btnStop">⏹ 停止</button>
+    <button class="btn" id="btnDemo">🎬 渐进长片 38s</button>
+    <button class="btn" id="btnScene">🎭 切换模式</button>
   </div>
   <div class="era-indicator" id="eraIndicator">—</div>
 </div>
@@ -199,7 +201,9 @@
 <script src="lib/sand_paint.js"></script>
 <script src="transitions.js"></script>
 <script src="eras.js"></script>
+<script src="progressive_demo_schedule.js"></script>
 <script src="scenes/s01_classic.js"></script>
+<script src="scenes/s02_flow_mountain.js"></script>
 <script src="scenes/index.js"></script>
 <script src="engine.js"></script>
 
@@ -319,11 +323,51 @@
     renderCurrent();
   }
 
+  var currentMode = 'eras';
+
+  function applyProgressiveDemo() {
+    if (!window.setProgressiveSchedule) return alert('setProgressiveSchedule 未就绪，请刷新。');
+    var seq = window.PROGRESSIVE_DEMO ? window.PROGRESSIVE_DEMO() : [
+      { scene: 's01_classic', duration: 8 },
+      { morph: { to: 's02_flow_mountain', mode: 'wipe_palm_half', duration: 20, intensity: 0.95 }},
+      { scene: 's02_flow_mountain', duration: 10 }
+    ];
+    window.setProgressiveSchedule(seq);
+    currentMode = 'progressive_demo';
+    totalDur = 0; ensureEngine();
+    currentT = 0;
+    renderCurrent();
+    eraIndicator.textContent = '🎬 渐进长片模式 s01→(20s手抹)→s02';
+  }
+
+  function toggleMode() {
+    if (currentMode === 'eras' || currentMode === 'scene_single') {
+      applyProgressiveDemo();
+    } else if (currentMode === 'progressive_demo') {
+      // 切换成单 scene s02
+      if (window.setProgressiveSchedule) window.setProgressiveSchedule(null);
+      currentMode = 'scene_single';
+      totalDur = 0; ensureEngine();
+      currentT = 0;
+      renderCurrent();
+      eraIndicator.textContent = '🎭 单场景模式 s02_flow_mountain';
+    } else {
+      if (window.setProgressiveSchedule) window.setProgressiveSchedule(null);
+      currentMode = 'eras';
+      totalDur = 0; ensureEngine();
+      currentT = 0;
+      renderCurrent();
+      eraIndicator.textContent = '⏱  Era 时间表模式';
+    }
+  }
+
   var sliderBeingDragged = false;
 
   playBtn.addEventListener('click', doPlay);
   pauseBtn.addEventListener('click', doPause);
   stopBtn.addEventListener('click', doStop);
+  if (document.getElementById('btnDemo')) document.getElementById('btnDemo').addEventListener('click', applyProgressiveDemo);
+  if (document.getElementById('btnScene')) document.getElementById('btnScene').addEventListener('click', toggleMode);
 
   slider.addEventListener('mousedown', function() { sliderBeingDragged = true; });
   slider.addEventListener('touchstart', function() { sliderBeingDragged = true; }, { passive: true });

@@ -1,5 +1,8 @@
 (() => {
   if (!window.SCENES) window.SCENES = {};
+  if (!window.__PROGRESSIVE__) {
+    window.__PROGRESSIVE__ = { schedule: null, current: null };
+  }
 
   const BPM = 100;
   const SECONDS_PER_BEAT = 60 / BPM;
@@ -136,12 +139,26 @@
     }
   }
 
+  function setProgressiveSchedule(arraySeq) {
+    if (!window.TRANSITIONS || typeof window.TRANSITIONS.scheduleProgressive !== 'function') return null;
+    const schedule = window.TRANSITIONS.scheduleProgressive(arraySeq, {});
+    window.__PROGRESSIVE__.schedule = schedule;
+    window.__PROGRESSIVE__.current = null;
+    return schedule;
+  }
+
   function renderFrame(t_seconds) {
     const canvas = window.__sandCanvas || (typeof document !== 'undefined' ? document.querySelector('canvas') : null);
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     const W = canvas.width;
     const H = canvas.height;
+
+    if (window.__PROGRESSIVE__ && window.__PROGRESSIVE__.schedule) {
+      const schedule = window.__PROGRESSIVE__.schedule;
+      schedule.renderAt(t_seconds, ctx);
+      return;
+    }
 
     const tl = getTimeline();
     if (tl.length === 0) {
@@ -302,6 +319,7 @@
   }
 
   window.renderFrame = renderFrame;
+  window.setProgressiveSchedule = setProgressiveSchedule;
   window.__sandEngine = {
     BPM,
     SECONDS_PER_EIGHTH,
@@ -310,7 +328,14 @@
     findEraAt,
     computeBeatPunch,
     getEighthAndBeat,
+    setProgressiveSchedule,
+    get progressiveSchedule() {
+      return (window.__PROGRESSIVE__ && window.__PROGRESSIVE__.schedule) ? window.__PROGRESSIVE__.schedule : null;
+    },
     get totalDuration() {
+      if (window.__PROGRESSIVE__ && window.__PROGRESSIVE__.schedule) {
+        return window.__PROGRESSIVE__.schedule.totalDuration;
+      }
       getTimeline();
       return _totalDuration;
     }
@@ -360,8 +385,10 @@
       const elapsed = (ts - startT) / 1000;
       const tl = getTimeline();
       let loopT = elapsed;
-      if (_totalDuration > 0 && elapsed > _totalDuration + 0.5) {
-        startT = ts - (elapsed % _totalDuration) * 1000;
+      const progSched = (window.__PROGRESSIVE__ && window.__PROGRESSIVE__.schedule) ? window.__PROGRESSIVE__.schedule : null;
+      const effDur = progSched ? progSched.totalDuration : _totalDuration;
+      if (effDur > 0 && elapsed > effDur + 0.5) {
+        startT = ts - (elapsed % effDur) * 1000;
         loopT = (ts - startT) / 1000;
       }
       renderFrame(loopT);
