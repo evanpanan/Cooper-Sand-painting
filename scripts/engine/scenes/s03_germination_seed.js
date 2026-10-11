@@ -6,9 +6,9 @@
 
   function drawLightTable(c, W, H, lt, t) {
     const breath = 0.98 + Math.sin(t * 1.1) * 0.02;
-    const r = Math.floor((0 + 20 * lt) * breath);
-    const g = Math.floor((32 + 58 * lt) * breath);
-    const b = Math.floor((64 + 81 * lt) * breath);
+    const r = Math.floor((150 + 20 * lt) * breath);
+    const g = Math.floor((172 + 26 * lt) * breath);
+    const b = Math.floor((178 + 22 * lt) * breath);
     c.fillStyle = `rgb(${r},${g},${b})`;
     c.fillRect(0, 0, W, H);
 
@@ -18,6 +18,12 @@
     c.fillStyle = vig;
     c.fillRect(0, 0, W, H);
 
+    const bottomShade = c.createLinearGradient(0, H * 0.6, 0, H);
+    bottomShade.addColorStop(0, "rgba(0,0,0,0)");
+    bottomShade.addColorStop(1, "rgba(0,0,0,0.06)");
+    c.fillStyle = bottomShade;
+    c.fillRect(0, 0, W, H);
+
     const shimmerCount = 35;
     for (let i = 0; i < shimmerCount; i++) {
       const seed = i * 29.3 + t * 10;
@@ -25,7 +31,7 @@
       const y = rand(seed + 1) * H;
       const a = (0.05 + rand(seed + 2) * 0.12) * (0.5 + 0.5 * Math.sin(t * 2.2 + i));
       if (a > 0) {
-        c.fillStyle = `rgba(${Math.floor(0 * lt)},${Math.floor(128 * lt)},${Math.floor(165 * lt)},${a})`;
+        c.fillStyle = `rgba(${Math.floor(210 * lt)},${Math.floor(225 * lt)},${Math.floor(230 * lt)},${a})`;
         c.beginPath();
         c.arc(x, y, 0.4 + rand(seed + 3) * 1.2, 0, Math.PI * 2);
         c.fill();
@@ -73,9 +79,9 @@
       const y = rand(seed + 1) * H;
       const size = 0.25 + rand(seed + 2) * 1.1;
       const alpha = (0.06 + rand(seed + 3) * 0.22);
-      const gr = 146 + Math.floor(rand(seed + 4) * 42);
-      const gg = 154 + Math.floor(rand(seed + 5) * 32);
-      const gb = 138 + Math.floor(rand(seed + 6) * 26);
+      const gr = 110 + Math.floor(rand(seed + 4) * 80);
+      const gg = 118 + Math.floor(rand(seed + 5) * 70);
+      const gb = 100 + Math.floor(rand(seed + 6) * 60);
       c.fillStyle = `rgba(${Math.floor(gr * lt)},${Math.floor(gg * lt)},${Math.floor(gb * lt)},${alpha})`;
       c.beginPath();
       c.arc(x, y, size, 0, Math.PI * 2);
@@ -217,7 +223,7 @@
     const sproutEndY = sproutStartY - 80;
 
     for (let pass = 0; pass < 3; pass++) {
-      c.strokeStyle = `rgba(${Math.floor(0 * lt)},${Math.floor(128 * lt)},${Math.floor(165 * lt)},${0.3 - pass * 0.06})`;
+      c.strokeStyle = `rgba(${Math.floor(210 * lt)},${Math.floor(225 * lt)},${Math.floor(230 * lt)},${0.3 - pass * 0.06})`;
       c.lineWidth = 3.4 - pass * 0.7;
       c.lineCap = 'round';
       c.beginPath();
@@ -259,7 +265,7 @@
     const sideLx1 = W * 0.2, sideLx2 = W * 0.45;
     const sideRx1 = W * 0.55, sideRx2 = W * 0.8;
     for (let pass = 0; pass < 2; pass++) {
-      c.strokeStyle = `rgba(${Math.floor(0 * lt)},${Math.floor(128 * lt)},${Math.floor(165 * lt)},${0.22 - pass * 0.04})`;
+      c.strokeStyle = `rgba(${Math.floor(210 * lt)},${Math.floor(225 * lt)},${Math.floor(230 * lt)},${0.22 - pass * 0.04})`;
       c.lineWidth = 2.6 - pass * 0.5;
       c.lineCap = 'round';
       c.beginPath();
@@ -296,7 +302,7 @@
     const endY = startY - baseLen * growPhase;
 
     for (let pass = 0; pass < 3; pass++) {
-      c.strokeStyle = `rgba(${Math.floor(0 * lt)},${Math.floor(128 * lt)},${Math.floor(165 * lt)},${0.3 - pass * 0.06})`;
+      c.strokeStyle = `rgba(${Math.floor(210 * lt)},${Math.floor(225 * lt)},${Math.floor(230 * lt)},${0.3 - pass * 0.06})`;
       c.lineWidth = 3.4 - pass * 0.7;
       c.lineCap = 'round';
       c.beginPath();

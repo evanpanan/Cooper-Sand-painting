@@ -6,9 +6,9 @@
 
   function drawLightTable(c, W, H, lt, t) {
     const breath = 0.98 + Math.sin(t * 1.1) * 0.02;
-    const r = Math.floor((0 + 20 * lt) * breath);
-    const g = Math.floor((32 + 58 * lt) * breath);
-    const b = Math.floor((64 + 81 * lt) * breath);
+    const r = Math.floor((150 + 20 * lt) * breath);
+    const g = Math.floor((172 + 26 * lt) * breath);
+    const b = Math.floor((178 + 22 * lt) * breath);
     c.fillStyle = `rgb(${r},${g},${b})`;
     c.fillRect(0, 0, W, H);
 
@@ -25,7 +25,7 @@
       const y = rand(seed + 1) * H;
       const a = (0.05 + rand(seed + 2) * 0.12) * (0.5 + 0.5 * Math.sin(t * 2.2 + i));
       if (a > 0) {
-        c.fillStyle = `rgba(${Math.floor(0 * lt)},${Math.floor(128 * lt)},${Math.floor(165 * lt)},${a})`;
+        c.fillStyle = `rgba(${Math.floor(210 * lt)},${Math.floor(225 * lt)},${Math.floor(230 * lt)},${a})`;
         c.beginPath();
         c.arc(x, y, 0.4 + rand(seed + 3) * 1.2, 0, Math.PI * 2);
         c.fill();
@@ -73,9 +73,9 @@
       const y = rand(seed + 1) * H;
       const size = 0.25 + rand(seed + 2) * 1.1;
       const alpha = (0.06 + rand(seed + 3) * 0.22);
-      const gr = 146 + Math.floor(rand(seed + 4) * 42);
-      const gg = 154 + Math.floor(rand(seed + 5) * 32);
-      const gb = 138 + Math.floor(rand(seed + 6) * 26);
+      const gr = 110 + Math.floor(rand(seed + 4) * 80);
+      const gg = 118 + Math.floor(rand(seed + 5) * 70);
+      const gb = 100 + Math.floor(rand(seed + 6) * 60);
       c.fillStyle = `rgba(${Math.floor(gr * lt)},${Math.floor(gg * lt)},${Math.floor(gb * lt)},${alpha})`;
       c.beginPath();
       c.arc(x, y, size, 0, Math.PI * 2);
@@ -366,7 +366,7 @@
 
     [haloR1, haloR2].forEach((HR, hi) => {
       for (let pass = 0; pass < 2; pass++) {
-        c.strokeStyle = `rgba(${Math.floor(0 * lt)},${Math.floor(128 * lt)},${Math.floor(165 * lt)},${(0.26 - pass * 0.05) * (0.8 + hi * 0.2)})`;
+        c.strokeStyle = `rgba(${Math.floor(210 * lt)},${Math.floor(225 * lt)},${Math.floor(230 * lt)},${(0.26 - pass * 0.05) * (0.8 + hi * 0.2)})`;
         c.lineWidth = 2.8 - pass * 0.5 - hi * 0.3;
         c.lineCap = 'round';
         c.beginPath();
@@ -417,7 +417,7 @@
       const lineR = bx + boxW - 4;
       const bSeed = 140000 + bi * 180;
       for (let pass = 0; pass < 2; pass++) {
-        c.strokeStyle = `rgba(${Math.floor(0 * lt)},${Math.floor(128 * lt)},${Math.floor(165 * lt)},${(0.26 - pass * 0.05) * alphaMul})`;
+        c.strokeStyle = `rgba(${Math.floor(210 * lt)},${Math.floor(225 * lt)},${Math.floor(230 * lt)},${(0.26 - pass * 0.05) * alphaMul})`;
         c.lineWidth = 2.6 - pass * 0.5;
         c.lineCap = 'round';
         c.beginPath();

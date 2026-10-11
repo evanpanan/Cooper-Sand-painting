@@ -334,10 +334,14 @@ def run_render(args):
             ffmpeg_cmd += [
                 "-i", args.audio,
                 "-filter_complex",
-                f"[1:a]volume={args.audio_mix}[a1];[a1]atrim=0:{duration},asetpts=N/SR/TB[aout]",
-                "-map", "0:v", "-map", "[aout]",
+                f"[0:v]scale=trunc(iw/2)*2:trunc(ih/2)*2[v];[1:a]volume={args.audio_mix}[a1];[a1]atrim=0:{duration},asetpts=N/SR/TB[aout]",
+                "-map", "[v]", "-map", "[aout]",
                 "-c:a", "aac", "-b:a", "192k",
                 "-shortest",
+            ]
+        else:
+            ffmpeg_cmd += [
+                "-vf", "scale=trunc(iw/2)*2:trunc(ih/2)*2",
             ]
         ffmpeg_cmd += [
             "-c:v", "libx264",
